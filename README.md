@@ -2,7 +2,7 @@
 
 This repository contains the supplementary material and implementation for our submission to the ICSE26 Demo track on the work on verifying natural language (NL) requirements in graphical user interface (GUI) prototypes using a multi‑modal LLM-based agent. The system is designed to integrate seamlessly with developer workflows and LLM-driven programming agents, providing actionable verification feedback and a closed feedback loop for iterative improvement.
 
-### Introduction and Overview
+## Introduction and Overview
 
 <img src="https://raw.githubusercontent.com/kristiankolthoff/GUISpector/refs/heads/main/webapp/media/static/overview/overview_gui_spector.png" width="100%">
 
@@ -22,7 +22,7 @@ A short video presentation showcasing the system is available here:
 </a>
 
 
-### Project Structure
+## Project Structure
 
 - `gui_spector`: Core Python package with the agent orchestration, verification pipeline, LLM integration, Playwright/Docker execution backends, and utilities. Managed with Poetry.
 - `webapp`: Prototypical Django web application demonstrating the system end‑to‑end (data models, Celery tasks, Channels websockets, views, and templates).
