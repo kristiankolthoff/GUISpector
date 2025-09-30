@@ -1,0 +1,1236 @@
+{
+  "app_name": "Park & Pay",
+  "context": "City Parking Finder & Pay",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "App shall load with a combined map and list of nearby parking options sourced from seeded city data.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "When the prototype loads, a default city map view is displayed with parking markers.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Parking list panel is populated automatically with at least five seeded parking options.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "No user interaction is required to see initial parking options in both map and list.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "ZX99"
+    },
+    {
+      "id": "REQ-002",
+      "description": "A toggle control shall allow users to switch between combined map-plus-list view and full-screen list view.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Toggle button labeled 'Map/List' is visible on the primary toolbar.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Clicking the toggle hides the map and expands the list view to full width.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Clicking the toggle again restores the combined map and list layout without page reload.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "WP70"
+    },
+    {
+      "id": "REQ-003",
+      "description": "Search field shall allow users to locate parking options by entering an address or landmark.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Search field accepts free-text input of at least three characters.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Submitting a search filters the list to entries matching address or landmark keywords.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Map re-centers to the first matching parking location after search submission.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "UP18"
+    },
+    {
+      "id": "REQ-004",
+      "description": "App shall provide a price range slider to narrow parking options by hourly rate.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Price slider allows selection of minimum and maximum hourly rate values.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Adjusting the slider updates the parking list to show only entries within the selected price range.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Map markers for filtered-out spots are visually muted or hidden after slider adjustments.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "IO58"
+    },
+    {
+      "id": "REQ-005",
+      "description": "Users shall be able to filter parking options by vehicle type such as Standard, EV, or Motorcycle.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Vehicle type filter displays options for Standard, EV, and Motorcycle.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting a vehicle type updates the list to show only compatible spots.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Filter selection persists while the user navigates between map and detail views during the session.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "CQ26"
+    },
+    {
+      "id": "REQ-006",
+      "description": "Each parking entry shall display its current availability status using color-coded badges.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Parking cards show a status badge such as 'Open', 'Filling', or 'Full'.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Status badge colors correspond to the legend displayed on screen.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Status values originate from seeded availability data and appear both on list items and map markers.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "OJ77"
+    },
+    {
+      "id": "REQ-007",
+      "description": "Selecting a parking entry shall open a detail panel with comprehensive spot information.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Clicking a list item opens a detail panel without navigating away from the main screen.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Detail panel shows hourly rate, operating hours, maximum duration, and full address.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Panel includes a button to initiate the reservation process.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "NQ89"
+    },
+    {
+      "id": "REQ-008",
+      "description": "App shall allow the user to create a parking reservation stored in browser local storage.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Reservation form collects date, start time, duration, and selected spot identifier.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Submitting a valid form creates a reservation entry persisted in local storage.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Confirmation view reflects reservation details immediately after submission.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "ON35"
+    },
+    {
+      "id": "REQ-009",
+      "description": "User shall be able to cancel an active reservation via the reservation management view.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Active reservation section shows the current booking with a cancel action.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting cancel prompts confirmation to prevent accidental removal.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Upon confirmation, reservation data is removed from local storage and the UI updates to show no active reservation.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "SG43"
+    },
+    {
+      "id": "REQ-010",
+      "description": "App shall display a live countdown timer for the upcoming reservation start time.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Countdown timer shows time remaining until reservation start in minutes and seconds.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Timer updates automatically at least once per second without page reload.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Timer stops at zero and changes status to 'Active Now'.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "PE29"
+    },
+    {
+      "id": "REQ-011",
+      "description": "App shall provide step-by-step walking directions preview from current location to the selected parking spot.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Detail panel includes a 'Directions' action button.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Upon activation, directions view lists sequential steps leading to the spot.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Directions can be dismissed to return to the detail panel without losing context.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "XC11"
+    },
+    {
+      "id": "REQ-012",
+      "description": "App shall simulate payment checkout to confirm reservation charges.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Checkout modal collects name on card, card number, expiry, and CVV fields with validation.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Submitting valid payment details shows a confirmation with summarized charges.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Invalid or incomplete payment fields display inline validation messages and block submission.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "RJ90"
+    },
+    {
+      "id": "REQ-013",
+      "description": "App shall maintain a reservation history list stored in local storage.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Previous reservations persist across sessions via local storage.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "History view lists spot name, date, duration, and amount paid.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "User can clear history via dedicated control which wipes the local storage entries.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "DO84"
+    },
+    {
+      "id": "REQ-014",
+      "description": "Users shall be able to add and remove parking spots from a favorites list.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Each parking card includes a favorite toggle control.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selected favorites appear in a dedicated favorites section.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Removing a favorite updates both the favorites list and the original card indicator instantly.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "LH51"
+    },
+    {
+      "id": "REQ-015",
+      "description": "App shall display zone-specific parking regulations within the spot detail panel.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Detail panel includes a regulation summary specific to the selected parking zone.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Regulation summary covers maximum duration, permit requirements, and enforcement hours.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Regulation content updates when the user switches between different parking spots.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "MI48"
+    },
+    {
+      "id": "REQ-016",
+      "description": "App shall present an onboarding tutorial overlay highlighting key controls on the first visit.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "On first load with no tutorial completion flag, an overlay appears dimming the main UI.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Overlay sequences through at least three tips with 'Next' and 'Skip' controls.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Completing or skipping the tutorial sets a flag in local storage to prevent repeat display.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "ZI45"
+    },
+    {
+      "id": "REQ-017",
+      "description": "Parking list shall support sorting by price and by estimated walking distance.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Sort control includes options 'Price: Low to High' and 'Distance: Near to Far'.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting a sort option reorders the list accordingly using seeded metrics.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Sort selection remains active until the user changes or resets it in the current session.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "SK83"
+    },
+    {
+      "id": "REQ-018",
+      "description": "App shall display a mock occupancy trend chart for the selected parking spot.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Detail view includes a mini chart element with hourly occupancy percentages.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Chart updates to reflect data for the newly selected spot.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Chart includes a legend showing the meaning of axes and colors.",
+          "ann1_ante": "met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "DQ80"
+    },
+    {
+      "id": "REQ-019",
+      "description": "Users shall manage a primary vehicle profile for reservation defaults.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Profile drawer allows entry of vehicle nickname, type, and license plate.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Saved vehicle data persists in local storage and auto-populates reservation forms.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Users can update vehicle information and see instant confirmation of changes.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "MT45"
+    },
+    {
+      "id": "REQ-020",
+      "description": "App shall generate a shareable deep-link that reopens the app with the reserved spot preselected.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "After reservation, share action produces a URL containing the spot identifier.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Copying or sharing the URL preserves it to the clipboard or device share sheet.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Opening the generated URL preloads the app state to focus on the reserved spot.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "JT69"
+    },
+    {
+      "id": "REQ-021",
+      "description": "App shall support scheduling reservations for any future date within 30 days.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Date picker allows selection up to 30 days ahead.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selected future date is stored with the reservation confirmation.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Availability validation confirms the spot is reservable on the chosen future date before submission.",
+          "ann1_ante": "met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "EU86"
+    },
+    {
+      "id": "REQ-022",
+      "description": "Dragging the map shall refresh the parking list based on the map's current viewport.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "User can drag or zoom the map canvas freely.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Once the map settles, the parking list updates to spots within the new viewport automatically.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "List update occurs without requiring a manual refresh button.",
+          "ann1_ante": "met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "KB82"
+    },
+    {
+      "id": "REQ-023",
+      "description": "Checkout flow shall allow entry of promo codes to apply discounts to parking charges.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Promo code input accepts at least six-character codes.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Valid promo code reduces the displayed total before the user confirms payment.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "not_met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Invalid promo codes display a clear error message without clearing the entered code.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "WK54"
+    },
+    {
+      "id": "REQ-024",
+      "description": "App shall produce a downloadable parking receipt file for each completed reservation.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "After payment confirmation, user can tap a 'Download Receipt' action.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Action generates a PDF or equivalent document with reservation and payment details.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Receipt file saves to the user's device via standard browser download prompt.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "MH44"
+    },
+    {
+      "id": "REQ-025",
+      "description": "App shall automatically refresh parking availability statuses every 60 seconds without user input.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Background timer triggers availability refresh every 60 seconds.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Refreshed availability updates list and map indicators seamlessly.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "User receives a subtle toast indicating auto-refresh occurred.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "EE81"
+    },
+    {
+      "id": "REQ-026",
+      "description": "App shall verify resident parking permits by connecting to the municipal permit API before confirming reservation.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Reservation form includes a permit number field when the zone requires it.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Upon submission, the app calls the municipal API to validate permit status.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Reservation confirmation is blocked if permit validation fails.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "HG22"
+    },
+    {
+      "id": "REQ-027",
+      "description": "App shall send browser push notifications reminding users 15 minutes before the parking session ends.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "On reservation confirmation, user is prompted to enable notifications.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "If enabled, service schedules a push notification for 15 minutes before end time.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Notification includes spot name and link to extend the session.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "WK87"
+    },
+    {
+      "id": "REQ-028",
+      "description": "App shall allow users to scan their license plate via device camera to auto-fill vehicle information.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Vehicle profile view offers a 'Scan Plate' option using the device camera.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Captured image is processed to recognize plate characters.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Recognized plate auto-populates corresponding input fields with an option to edit.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "DQ56"
+    },
+    {
+      "id": "REQ-029",
+      "description": "App shall provide an offline mode showing last-synced parking data when network is unavailable.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "When offline, app detects connectivity loss and switches to an offline banner.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Last cached parking list and map tiles remain accessible during offline state.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "App queues user actions made offline and syncs them once connection restores.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "XI89"
+    },
+    {
+      "id": "REQ-030",
+      "description": "App shall offer a language toggle between English and Spanish across all user-facing text.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Language selector control is accessible from the main menu.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Switching to Spanish updates labels, buttons, and content text immediately.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Language selection persists across sessions and applies to tutorial messages.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "NN45"
+    }
+  ]
+}

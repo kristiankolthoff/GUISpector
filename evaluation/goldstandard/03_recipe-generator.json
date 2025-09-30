@@ -1,0 +1,1236 @@
+{
+  "app_name": "Recipe Generator",
+  "context": "Personalized recipes generated from available fridge ingredients",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "The system shall allow users to add a new ingredient with optional quantity notes to the fridge inventory.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Given a non-empty ingredient name, clicking the add control inserts a new ingredient card at the top of the inventory list.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "The ingredient card displays both the ingredient name and any optional quantity note entered.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Adding an ingredient does not require a page reload and the new ingredient becomes immediately actionable for other inventory features.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "IB30"
+    },
+    {
+      "id": "REQ-002",
+      "description": "The system shall enable users to delete any existing ingredient from the inventory list.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Each ingredient card presents a remove action.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Activating the remove action deletes the ingredient from the visible list instantly.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Removed ingredients remain absent after a page refresh.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "WI00"
+    },
+    {
+      "id": "REQ-003",
+      "description": "The system shall allow users to toggle each ingredient between 'In Fridge' and 'Out of Stock' states.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Each ingredient card includes an availability toggle between 'In Fridge' and 'Out of Stock'.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Changing the toggle updates the ingredient’s visual state immediately.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Recipe generation logic treats only ingredients marked 'In Fridge' as available inputs.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "DT04"
+    },
+    {
+      "id": "REQ-004",
+      "description": "The system shall provide quick-add buttons for at least eight common ingredients.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "A quick-add panel lists no fewer than eight preset ingredients.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Clicking a preset ingredient instantly adds it to the inventory if it is not already present.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Subsequent clicks on the same preset update the existing ingredient entry instead of creating duplicates.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "AD72"
+    },
+    {
+      "id": "REQ-005",
+      "description": "The system shall persist the fridge inventory using browser storage.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "On load, the system retrieves inventory data from browser storage and renders it.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Inventory changes are saved to browser storage immediately after each mutation.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Refreshing or reopening the app restores the latest inventory state.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "DU90"
+    },
+    {
+      "id": "REQ-006",
+      "description": "The system shall generate a list of recipe suggestions prioritized by alignment with available ingredients.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Pressing the 'Find Recipes' control evaluates current inventory against the recipe dataset.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Recipes using only available ingredients appear before recipes requiring substitutions.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Each recipe suggestion displays counts of matching and missing ingredients.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "OJ32"
+    },
+    {
+      "id": "REQ-007",
+      "description": "The system shall display missing ingredients for every recipe suggestion.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Recipe cards list all ingredients required for the dish.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Ingredients not present in the current inventory are grouped under a 'Missing' label.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Missing ingredient lists update immediately when inventory availability changes.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "NO75"
+    },
+    {
+      "id": "REQ-008",
+      "description": "The system shall present a recipe detail view with full instructions when a recipe is selected.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Selecting a recipe card opens a detail view via overlay or dedicated panel.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "The detail view includes step-by-step instructions in sequential order.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Closing the detail view returns to the prior list without losing state.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "WQ63"
+    },
+    {
+      "id": "REQ-009",
+      "description": "The system shall allow users to filter recipes by meal type categories.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Meal type filter options such as Breakfast, Lunch, Dinner, and Snack are visible above the recipe list.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting one or more meal types limits the visible recipes to the chosen categories.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Clearing the selection restores the full recipe list.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "DA68"
+    },
+    {
+      "id": "REQ-010",
+      "description": "The system shall support keyword search across recipe names and tags.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "A keyword search input is available adjacent to the recipe list.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Entering text filters recipes in real time by matching name or associated keywords.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Clearing the search field restores the original recipe ordering.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "TR07"
+    },
+    {
+      "id": "REQ-011",
+      "description": "The system shall allow users to favorite recipes and review them in a dedicated view.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Each recipe card contains a favorite toggle control.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Favorited recipes persist in browser storage across sessions.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "A favorites view displays only favorited recipes and updates when toggles change.",
+          "ann1_ante": "not_met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "VU27"
+    },
+    {
+      "id": "REQ-012",
+      "description": "The system shall enable users to mark ingredients with a 'Use Soon' flag for prioritization.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Ingredient cards provide a 'Use Soon' control.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Activating the control highlights the ingredient with a distinct visual style.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "The 'Use Soon' state is saved and restored via browser storage.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "DY52"
+    },
+    {
+      "id": "REQ-013",
+      "description": "The system shall display summary counters of tracked ingredients by availability state.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "A dashboard element shows the total number of tracked ingredients.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "The summary includes counts for ingredients marked 'In Fridge' and 'Out of Stock'.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Counters update immediately after any inventory modification.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "ES85"
+    },
+    {
+      "id": "REQ-014",
+      "description": "The system shall allow users to edit ingredient names and quantity notes inline.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Ingredient cards offer an edit action that reveals editable fields.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Saving edits updates the ingredient name and quantity within the list.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Edited values persist after the page is reloaded.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "ES56"
+    },
+    {
+      "id": "REQ-015",
+      "description": "The system shall let users sort the ingredient list by recency or alphabetically.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Sorting controls for 'Most Recent' and 'Alphabetical' are available in the inventory section.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting a sort option rearranges the ingredient cards immediately.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "The chosen sort order remains active until the user selects a different option.",
+          "ann1_ante": "not_met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "IS79"
+    },
+    {
+      "id": "REQ-016",
+      "description": "The system shall provide a 'Surprise Me' feature that opens a random recipe from the current list.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "A 'Surprise Me' button is accessible within the recipe toolbar.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Activating the button selects a random recipe from the currently filtered set.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "The selected recipe’s detail view opens automatically upon selection.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "FV97"
+    },
+    {
+      "id": "REQ-017",
+      "description": "The system shall allow users to create, save, and manage custom recipes.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "A custom recipe form collects name, meal type, selected ingredients, and instructions.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Saved custom recipes are stored in browser storage and appear alongside built-in recipes.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Custom recipes support filtering, searching, and favoriting like standard recipes.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "NO56"
+    },
+    {
+      "id": "REQ-018",
+      "description": "The system shall offer substitution suggestions for missing ingredients from a predefined mapping.",
+      "status": "met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Recipe detail views display substitution suggestions for each missing ingredient.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting a substitution updates the ingredient list display accordingly.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Chosen substitutions remain applied for the recipe during the current session.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "met",
+        "ann1_ante": "met",
+        "ann1_post": "met",
+        "ann2_ante": "met",
+        "ann2_post": "met"
+      },
+      "rand_id": "EC68"
+    },
+    {
+      "id": "REQ-019",
+      "description": "The system shall allow users to schedule generated recipes across a seven-day meal planner.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "A meal planner view presents seven consecutive days with separate meal slots.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Users can assign any recipe to a specific day and meal slot.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "Assigned meals persist in browser storage and can be cleared per slot.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "BC63"
+    },
+    {
+      "id": "REQ-020",
+      "description": "The system shall let users adjust recipe servings and automatically scale ingredient quantities.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Recipe detail views include a servings selector ranging from one to eight servings.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Changing the servings value recalculates each ingredient quantity proportionally.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Servings selections persist for each recipe during the active session.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "HM40"
+    },
+    {
+      "id": "REQ-021",
+      "description": "The system shall track ingredient expiration dates and signal upcoming expirations.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Ingredient edit forms allow entry of an optional expiration date.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Inventory listings display days remaining for ingredients with expiration dates.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Ingredients expiring within three days show a prominent warning badge.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "EJ32"
+    },
+    {
+      "id": "REQ-022",
+      "description": "The system shall build a consolidated shopping list from missing ingredients of selected recipes.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Users can add recipes to a shopping list queue from recipe cards or detail views.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "The system aggregates missing ingredients from all queued recipes without duplication.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "The shopping list allows marking items as acquired while persisting the status.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "high",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "FK78"
+    },
+    {
+      "id": "REQ-023",
+      "description": "The system shall support drag-and-drop reordering of ingredients into a custom sequence.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Ingredient cards expose a drag handle for initiating reordering.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Dropping an ingredient in a new position updates the displayed order immediately.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC3",
+          "text": "The custom order persists via browser storage across sessions.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "OR79"
+    },
+    {
+      "id": "REQ-024",
+      "description": "The system shall deliver a guided cooking mode with interactive timers for timed steps.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Recipe detail views provide a guided mode that displays one instruction step at a time.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        },
+        {
+          "id": "AC2",
+          "text": "Steps containing durations include a startable countdown timer.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Completing a step automatically advances to the next instruction in guided mode.",
+          "ann1_ante": "met",
+          "ann1_post": "met",
+          "ann2_ante": "met",
+          "ann2_post": "met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "partially_met",
+        "ann1_ante": "partially_met",
+        "ann1_post": "partially_met",
+        "ann2_ante": "partially_met",
+        "ann2_post": "partially_met"
+      },
+      "rand_id": "UN91"
+    },
+    {
+      "id": "REQ-025",
+      "description": "The system shall allow users to export the current inventory to a downloadable JSON file.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "An 'Export Inventory' action is available within the inventory menu.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Triggering export generates a JSON file representing the inventory state.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "The downloaded file name includes the current date stamp.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "QW65"
+    },
+    {
+      "id": "REQ-026",
+      "description": "The system shall allow users to import ingredients from a JSON file.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "An 'Import Inventory' action is accessible from the inventory menu.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Selecting a valid JSON file replaces the existing inventory with imported entries.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "The system validates file structure and notifies the user of import success.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "KA49"
+    },
+    {
+      "id": "REQ-027",
+      "description": "The system shall enable users to rate recipes on a five-star scale.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Recipe detail views display a five-star rating component.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Users can submit a rating for each recipe within the current browser session.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Recipe cards show the average rating and update after new submissions.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "ZZ34"
+    },
+    {
+      "id": "REQ-028",
+      "description": "The system shall allow creation and application of custom dietary filter tags.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "Users can define custom dietary filters through a filter management interface.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Recipes can be tagged with any created dietary filter.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Selecting a dietary filter restricts the recipe list to matching tags.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "medium",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "UC86"
+    },
+    {
+      "id": "REQ-029",
+      "description": "The system shall permit users to attach photos to custom recipes.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "The custom recipe form accepts an optional local photo upload.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Uploaded photos display on the recipe card and detail view.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Photo data is stored in browser storage to persist across sessions.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "BD21"
+    },
+    {
+      "id": "REQ-030",
+      "description": "The system shall generate a grocery pickup list organized by aisle categories.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "text": "The shopping list view includes predefined aisle categories such as Produce, Dairy, and Pantry.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC2",
+          "text": "Missing ingredients automatically map to aisle categories in the pickup list.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        },
+        {
+          "id": "AC3",
+          "text": "Users can reorder aisle sections to match their store layout.",
+          "ann1_ante": "not_met",
+          "ann1_post": "not_met",
+          "ann2_ante": "not_met",
+          "ann2_post": "not_met"
+        }
+      ],
+      "category": "functional",
+      "priority": "low",
+      "annotations": {
+        "ai": "not_met",
+        "ann1_ante": "not_met",
+        "ann1_post": "not_met",
+        "ann2_ante": "not_met",
+        "ann2_post": "not_met"
+      },
+      "rand_id": "AI09"
+    }
+  ]
+}
