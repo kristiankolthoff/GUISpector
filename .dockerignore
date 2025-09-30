@@ -2,7 +2,6 @@
 .cursorignore
 .cursor/
 infos.txt
-notebooks/
 __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
