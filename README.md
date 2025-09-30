@@ -2,6 +2,14 @@
 
 This repository contains the supplementary material and implementation for our submission to the ICSE26 Demo track on the work on verifying natural language (NL) requirements in graphical user interface (GUI) prototypes using a multi‑modal LLM-based agent. The system is designed to integrate seamlessly with developer workflows and LLM-driven programming agents, providing actionable verification feedback and a closed feedback loop for iterative improvement.
 
+> [!CAUTION]
+> Adapted from OpenAI’s Computer Using Agent caution ("Computer use is in preview") — see the
+> [OpenAI CUA sample app](https://github.com/openai/openai-cua-sample-app/tree/main).
+> Computer‑use capabilities are experimental and may be susceptible to exploits or inadvertent mistakes.
+> Do not use in authenticated environments or for high‑stakes tasks. Prefer isolated test systems and
+> least‑privilege configurations. Use at your own risk; the GUISpector authors and maintainers assume
+> no responsibility for any damage, data loss, or misuse.
+
 ## Introduction and Overview
 
 <img src="https://raw.githubusercontent.com/kristiankolthoff/GUISpector/refs/heads/main/webapp/media/static/overview/overview_gui_spector.png" width="100%">
