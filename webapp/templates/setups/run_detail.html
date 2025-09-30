@@ -1,0 +1,1020 @@
+{% extends 'base.html' %}
+{% block title %}Run #{{ run.id }} Summary{% endblock %}
+{% block content %}
+<div class="container-fluid px-3">
+  <div class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-body">
+      <div class="d-flex align-items-start justify-content-between flex-nowrap gap-3">
+        <div class="flex-grow-1 min-w-0">
+          <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+            <span class="fs-4 fw-bold mb-0">{{ requirement.title|default:'(no title)' }}{% if requirement.setup and requirement.setup.name %} ({{ requirement.setup.name }}){% endif %}</span>
+            <span id="requirementStatusBadge">
+              {% if requirement.status == 'met' %}
+                <span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>
+              {% elif requirement.status == 'partially_met' %}
+                <span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>
+              {% elif requirement.status == 'unmet' %}
+                <span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>
+              {% elif requirement.status == 'processing' %}
+                <span class="badge bg-warning text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Processing</span></span>
+              {% elif requirement.status == 'error' %}
+                <span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-exclamation-octagon-fill me-1"></i><span>Error</span></span>
+              {% else %}
+                <span class="badge bg-secondary">Unprocessed</span>
+              {% endif %}
+            </span>
+            {% if requirement.priority == 'high' %}
+              <span id="requirementPriorityBadge" class="badge badge-priority-high text-uppercase d-inline-flex align-items-center" style="letter-spacing:.3px;">High</span>
+            {% elif requirement.priority == 'low' %}
+              <span id="requirementPriorityBadge" class="badge badge-priority-low text-uppercase d-inline-flex align-items-center" style="letter-spacing:.3px;">Low</span>
+            {% else %}
+              <span id="requirementPriorityBadge" class="badge badge-priority-medium text-uppercase d-inline-flex align-items-center" style="letter-spacing:.3px;">Medium</span>
+            {% endif %}
+          </div>
+          <div class="text-muted small">Created {{ requirement.created_at|date:'Y-m-d H:i' }}</div>
+          <div class="mt-2">{{ requirement.description|linebreaksbr }}</div>
+          <div class="mt-2 d-flex flex-wrap gap-1">
+            {% for tag in requirement.tags_json %}
+              <span class="badge rounded-pill text-secondary border tag-chip">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <div class="mt-3 small text-muted d-flex align-items-center flex-wrap gap-3">
+            <span class="d-inline-flex align-items-center"><span>Run #{{ run.id }}</span></span>
+            <span class="d-inline-flex align-items-center"><i class="fa-solid fa-shoe-prints me-1"></i><span><strong>{{ run.steps_taken }}</strong> steps</span></span>
+            <span class="d-inline-flex align-items-center"><i class="bi bi-stopwatch me-1"></i><span><strong>{{ run.elapsed_s|floatformat:1 }}</strong> s</span></span>
+            <span class="d-inline-flex align-items-center"><i class="bi bi-play-fill me-1"></i><span>Started {{ run.started_at|date:'Y-m-d H:i:s' }}</span></span>
+            <span class="d-inline-flex align-items-center"><i class="bi bi-flag me-1"></i><span>Finished {{ run.finished_at|date:'Y-m-d H:i:s' }}</span></span>
+            <span class="d-inline-flex align-items-center text-truncate" style="max-width: 36rem;" title="{{ run.start_url }}{% if run.current_url %} → {{ run.current_url }}{% endif %}"><i class="bi bi-link-45deg me-1"></i><span>From <a href="{{ run.start_url }}" target="_blank" rel="noopener" class="link-muted text-decoration-underline">{{ run.start_url }}</a>{% if run.current_url %} → <a href="{{ run.current_url }}" target="_blank" rel="noopener" class="link-muted text-decoration-underline">{{ run.current_url }}</a>{% endif %}</span></span>
+            {% if tokens_present %}
+            <span class="d-inline-flex align-items-center"><i class="bi bi-cpu me-1"></i><span>#In-Tokens: <strong>{{ tokens_in_fmt }}</strong> · #Out-Tokens: <strong>{{ tokens_out_fmt }}</strong></span></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    .badge-status-partial { background: #f97316; color: #ffffff; border: 1px solid #ea580c; }
+    .badge-priority-low { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+    .badge-priority-medium { background: #fff3cd; color: #7a5d00; border: 1px solid #ffe69c; }
+    .badge-priority-high { background: #fdecea; color: #842029; border: 1px solid #ffcfcc; }
+    .tag-chip { background-color: transparent; }
+    .tag-chip:hover { background-color: #f1f3f5; }
+    .link-muted { color: inherit; text-decoration: none; cursor: pointer; }
+    .link-muted:hover, .link-muted:focus { text-decoration: underline; color: inherit; }
+    /* Ensure status and priority badges align perfectly */
+    #requirementStatusBadge .badge,
+    #requirementPriorityBadge { display:inline-flex; align-items:center; vertical-align:middle; line-height:1; padding-top:.35em; padding-bottom:.35em; }
+    .summary-block { background: #f8f9fa; border: 1px solid #e3e6eb; border-radius: 12px; padding: 12px; }
+    .criteria-item { border: 1px solid #e3e6eb; border-radius: 12px; }
+    .criteria-item-met { background: #e6f4ea; border-color: #c6e6cf; }
+    .criteria-item-unmet { background: #fdecea; border-color: #ffcfcc; }
+    #copyDetailedBtn { background-color: #fff; color: #212529; border-color: #ced4da; box-shadow: none; }
+    #copyDetailedBtn:hover, #copyDetailedBtn:focus { background-color: #f8f9fa; color: #212529; border-color: #ced4da; box-shadow: none; }
+    #copyDetailedBtn:active { background-color: #f1f3f5; color: #212529; border-color: #ced4da; box-shadow: none; }
+    /* Screenshot overlays */
+    .screenshot-wrap { position: relative; display: inline-block; }
+    .screenshot-wrap .overlay { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+    .click-marker { position: absolute; transform: translate(-50%, -50%); }
+    .click-marker .ring { width: 48px; height: 48px; border: 4px solid #dc3545; border-radius: 50%; background-color: rgba(220,53,69,0.25); box-shadow: 0 0 0 3px rgba(255,255,255,0.6); }
+    .click-marker .icon { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #dc3545; font-size: 20px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25)); }
+    .marker-large .ring { width: 56px; height: 56px; border-width: 5px; }
+    .marker-large .icon { font-size: 24px; }
+    .double-badge { position:absolute; right:-6px; top:-6px; background:#dc3545; color:#fff; border-radius:10px; font-size:10px; line-height:1; padding:2px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.15); }
+    .ov-pill { position:absolute; top:12px; left:12px; background:rgba(255,255,255,0.92); border:1px solid #e3e6eb; color:#212529; border-radius:18px; padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:6px; }
+    .pill-red { background: rgba(220,53,69,0.12); border-color: #dc3545; color: #dc3545; }
+    .label-badge { position:absolute; background: rgba(255,255,255,0.92); border:1px solid #ced4da; color:#212529; border-radius:12px; padding:2px 6px; font-size:11px; line-height:1.2; white-space:nowrap; }
+    .scroll-marker { position:absolute; right:12px; bottom:12px; color:#fff; font-size:22px; display:flex; align-items:center; gap:8px; background:#e7f1ff; border:1px solid #cfe2ff; border-radius:20px; padding:4px 8px; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,0.15); }
+    .scroll-marker i, .scroll-marker span { color:#fff; }
+    .move-marker { position:absolute; transform:translate(-50%,-50%); color:#dc3545; font-size:18px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25)); }
+    .drag-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+    .drag-line { stroke:#dc3545; stroke-width:3; stroke-dasharray:6 4; fill:none; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)); }
+    .drag-dot { fill:#dc3545; stroke:#fff; stroke-width:2; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)); }
+    /* Interaction thumbnails */
+    .thumb-strip { overflow-x:auto; white-space:nowrap; padding:8px 12px 8px 12px; margin-bottom:8px; border-bottom:1px solid #e3e6eb; scroll-padding-left: 12px; }
+    .thumb-item { display:inline-block; position:relative; margin-right:8px; }
+    .thumb-img { height:72px; border-radius:8px; border:1px solid #e3e6eb; background:#f8f9fa; }
+    .thumb-turn { position:absolute; top:6px; left:6px; background:rgba(255,255,255,0.92); border:1px solid #e3e6eb; color:#212529; border-radius:12px; padding:2px 6px; font-size:11px; }
+    .thumb-action { position:absolute; right:6px; bottom:6px; }
+    /* Interaction header layout tweaks */
+    .interaction-header { display:grid; grid-template-columns: 1fr auto; grid-template-rows:auto auto; column-gap:12px; row-gap:2px; align-items:center; }
+    .interaction-left { grid-column:1; grid-row:1; }
+    .interaction-right { grid-column:2; grid-row:1; text-align:right; }
+    .interaction-tokens { grid-column:2; grid-row:2; text-align:right; }
+    .chip { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; border:1px solid #e3e6eb; background:#fff; font-size:12px; }
+    .badge-status { border:1px solid #e3e6eb; padding:2px 8px; border-radius:999px; font-size:12px; }
+    .badge-status.completed { background:#e6f4ea; color:#146c43; border-color:#c6e6cf; }
+    .badge-status.pending { background:#fff3cd; color:#7a5d00; border-color:#ffe69c; }
+    .badge-status.error { background:#fdecea; color:#842029; border-color:#ffcfcc; }
+    /* Scroll-snap for thumbs */
+    .thumb-strip { scroll-snap-type: x mandatory; }
+    .thumb-item { scroll-snap-align: start; }
+    .thumb-item.active .thumb-img { outline:2px solid #0d6efd; outline-offset:2px; }
+    .thumb-strip.sticky { position: sticky; top: var(--toolbar-h, 56px); z-index: 50; background:#fff; border-bottom:1px solid #e3e6eb; }
+    .thumb-strip { margin-top: 0; padding-top: 8px; }
+    /* Clamp */
+    .clamp { display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .clamp-toggle { cursor:pointer; font-size:12px; }
+    .meta-bar { display:flex; flex-wrap:wrap; gap:6px; }
+    /* Interaction content layout */
+    .interaction-content { display:grid; grid-template-columns: minmax(0, 60%) minmax(0, 40%); gap:16px; align-items:start; }
+    @media (max-width: 992px) { .interaction-content { grid-template-columns: 1fr; } }
+    .interaction-details { display:flex; flex-direction:column; justify-content:center; min-height:100%; }
+    .interaction-details .section { margin-top:8px; }
+    .chip-muted { background:#f8f9fa; }
+    .badge-neutral { background:#f1f3f5; color:#495057; border:1px solid #e3e6eb; border-radius:999px; padding:2px 8px; font-size:12px; }
+    .badge-action { border:1px solid #e3e6eb; border-radius:999px; padding:2px 8px; font-size:12px; background:#fff; }
+    .badge-action.action-click { background:#fdecea; color:#842029; border-color:#ffcfcc; }
+    .badge-action.action-right_click { background:#efe7ff; color:#6f42c1; border-color:#e2d9f3; }
+    .badge-action.action-double_click { background:#fdecea; color:#842029; border-color:#ffcfcc; }
+    .badge-action.action-type { background:#e6fcf5; color:#0f5132; border-color:#c3f9ea; }
+    .badge-action.action-keypress { background:#e6fcf5; color:#0f5132; border-color:#c3f9ea; }
+    .badge-action.action-scroll { background:#e7f1ff; color:#0d6efd; border-color:#cfe2ff; }
+    .badge-action.action-drag { background:#fff3e8; color:#ad4b00; border-color:#ffe4cc; }
+    .badge-action.action-move { background:#f1f3f5; color:#495057; border-color:#e9ecef; }
+    /* Lightbox */
+    .lightbox-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:2000; }
+    .lightbox { background:#000; padding:8px; border-radius:8px; max-width:95vw; max-height:90vh; }
+    .lightbox img { max-width:95vw; max-height:80vh; }
+    .lightbox-toolbar { display:flex; align-items:center; justify-content:space-between; color:#fff; margin-bottom:6px; }
+  </style>
+  <style>
+    .interactions-toolbar .form-check-input { margin-top: 0; }
+    /* Keep filter buttons white on hover/focus */
+    #filterActionBtn, #filterActionBtn:hover, #filterActionBtn:focus, #filterActionBtn:active { background-color:#fff !important; color:#212529; border-color:#ced4da; box-shadow:none; }
+    #filterStatusBtn, #filterStatusBtn:hover, #filterStatusBtn:focus, #filterStatusBtn:active { background-color:#fff !important; color:#212529; border-color:#ced4da; box-shadow:none; }
+    .dropdown-menu { background-color:#fff !important; }
+    .dropdown-menu .dropdown-item { background-color:#fff !important; color:#212529; }
+    .dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus { background-color:#fff !important; color:#212529; }
+    .interaction-item.status-error { border-left: 4px solid #dc3545; }
+    .interaction-item.status-completed { border-left: 4px solid #198754; }
+    .interaction-item.status-pending { border-left: 4px solid #ffc107; }
+    /* Solid backgrounds for sticky rows */
+    .interactions-toolbar { background:#fff; box-shadow: 0 1px 0 rgba(0,0,0,0.06); padding-left: 12px; padding-right: 12px; }
+    /* Offset anchor scroll for sticky toolbar + thumbs */
+    .interaction-item { scroll-margin-top: calc(var(--toolbar-h, 56px) + var(--thumb-h, 84px)); }
+  </style>
+
+  
+
+  {% if decision %}
+  <div class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-header bg-transparent border-0 fw-bold d-inline-flex align-items-center"><i class="bi bi-clipboard-check me-2 text-muted"></i><span>Model Summary</span></div>
+    <div class="card-body">
+      {% if run.error %}
+      <div class="mb-3">
+        <div class="fw-semibold mb-2 d-inline-flex align-items-center"><i class="bi bi-exclamation-octagon me-2 text-danger"></i><span>Error</span></div>
+        <div class="summary-block" style="background:#fdecea; color:#842029; border-color:#ffcfcc;">{{ run.error|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+      {% if decision.explanation %}
+      <div class="mb-3">
+        <div class="fw-semibold mb-2 d-inline-flex align-items-center"><i class="bi bi-info-circle me-2 text-muted"></i><span>Explanation</span></div>
+        <div class="summary-block">{{ decision.explanation|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+      {% if decision.detailed %}
+      <div class="mb-3">
+        <div class="fw-semibold mb-2 d-inline-flex align-items-center">
+          <i class="bi bi-file-earmark-text me-2 text-muted"></i><span>Detailed Summary</span>
+          <button class="btn btn-sm btn-outline-secondary ms-2" id="copyDetailedBtn" type="button" title="Copy detailed summary"><i class="bi bi-clipboard"></i></button>
+        </div>
+        <div class="summary-block" id="detailedSummaryText">{{ decision.detailed|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+      {% if decision.acceptance %}
+      <div>
+        <div class="fw-semibold mb-2 d-inline-flex align-items-center"><i class="bi bi-list-check me-2 text-muted"></i><span>Acceptance Criteria</span></div>
+        <div class="list-group">
+          {% for item in decision.acceptance %}
+            <div class="list-group-item criteria-item {% if item.met == True %}criteria-item-met{% elif item.met == False %}criteria-item-unmet{% endif %} p-3 mb-2">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div class="d-flex align-items-start gap-2 flex-grow-1">
+                  {% if item.met == True %}
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                  {% elif item.met == False %}
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                  {% else %}
+                    <i class="bi bi-dash-circle-fill text-muted"></i>
+                  {% endif %}
+                  <div>
+                    <div class="fw-semibold">{{ item.criteria }}</div>
+                    {% if item.explanation %}
+                    <div class="small text-muted mt-1">{{ item.explanation|linebreaksbr }}</div>
+                    {% endif %}
+                    {% if item.evidence %}
+                    <div class="small text-muted mt-1">{{ item.evidence|linebreaksbr }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="align-self-center">
+                  {% if item.met == True %}
+                    <span class="badge" style="background:#e6f4ea; color:#146c43; border:1px solid #c6e6cf;">Met</span>
+                  {% elif item.met == False %}
+                    <span class="badge" style="background:#fdecea; color:#842029; border:1px solid #ffcfcc;">Unmet</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">N/A</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-transparent border-0 fw-bold d-inline-flex align-items-center"><i class="bi bi-cursor me-2 text-muted"></i><span>Interactions</span></div>
+     <div class="card-body p-0" id="interactionsBody" style="max-height:82vh; overflow:auto;">
+       <div class="interactions-toolbar sticky-top bg-white pt-1 pb-2" style="top:0; z-index: 60; border-bottom: 1px solid #e3e6eb;">
+         <div class="d-flex flex-wrap align-items-center gap-2">
+           <div class="d-inline-flex align-items-center gap-2">
+             <span class="small text-muted">Action</span>
+             <div class="dropdown">
+               <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterActionBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                 <span id="filterActionLabel"><span class="badge text-bg-light border">All</span></span>
+               </button>
+               <ul class="dropdown-menu" aria-labelledby="filterActionBtn" id="filterActionMenu" style="min-width: 200px;">
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value=""><span class="badge text-bg-light border me-2">All</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="click"><span class="badge-action action-click me-2">Click</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="double_click"><span class="badge-action action-double_click me-2">Double Click</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="right_click"><span class="badge-action action-right_click me-2">Right Click</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="type"><span class="badge-action action-type me-2">Type</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="keypress"><span class="badge-action action-keypress me-2">Keypress</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="scroll"><span class="badge-action action-scroll me-2">Scroll</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="drag"><span class="badge-action action-drag me-2">Drag</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="move"><span class="badge-action action-move me-2">Move</span></a></li>
+               </ul>
+             </div>
+           </div>
+           <div class="d-inline-flex align-items-center gap-2">
+             <span class="small text-muted">Status</span>
+             <div class="dropdown">
+               <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterStatusBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                 <span id="filterStatusLabel"><span class="badge text-bg-light border">All</span></span>
+               </button>
+               <ul class="dropdown-menu" aria-labelledby="filterStatusBtn" id="filterStatusMenu" style="min-width: 200px;">
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value=""><span class="badge text-bg-light border me-2">All</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="completed"><span class="badge-status completed me-2">Completed</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="pending"><span class="badge-status pending me-2">Pending</span></a></li>
+                 <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="error"><span class="badge-status error me-2">Error</span></a></li>
+               </ul>
+             </div>
+           </div>
+           <div class="d-inline-flex align-items-center gap-2">
+             <input id="filterSearch" type="search" class="form-control form-control-sm" placeholder="Search reasoning/message" style="min-width: 220px;">
+             <button id="filterReset" class="btn btn-sm btn-outline-secondary" type="button">Reset</button>
+           </div>
+         </div>
+       </div>
+      {% if interactions %}
+      <div class="thumb-strip sticky">
+        {% for it in interactions %}
+          {% if it.screenshot_url %}
+           <a href="#it-{{ it.turn_index }}" id="thumb-{{ it.turn_index }}" class="thumb-item" data-target-id="it-{{ it.turn_index }}" data-action-type="{{ it.action.type|default:''|lower }}" data-action-status="{{ it.action.status|default:''|lower }}" data-has-screenshot="1" title="Turn #{{ it.turn_index }}{% if it.action and it.action.type %} · {{ it.action.type }}{% endif %}">
+            <img src="{{ it.screenshot_url|add:'' }}" loading="lazy" fetchpriority="low" class="thumb-img" alt="turn {{ it.turn_index }} screenshot">
+            <span class="thumb-turn">#{{ it.turn_index }}</span>
+             {% if it.action and it.action.type %}
+             <span class="thumb-action badge-action action-{{ it.action.type|lower }}">{{ it.action.type|lower }}</span>
+            {% endif %}
+          </a>
+            {% endif %}
+        {% endfor %}
+            </div>
+            {% endif %}
+      {% if interactions %}
+        {% for it in interactions %}
+          <div id="it-{{ it.turn_index }}" class="border rounded p-3 mb-3 interaction-item{% if it.action.status %} status-{{ it.action.status|lower }}{% endif %}" data-turn="{{ it.turn_index }}" data-action-type="{{ it.action.type|default:''|lower }}" data-action-status="{{ it.action.status|default:''|lower }}" data-has-screenshot="{% if it.screenshot_url %}1{% else %}0{% endif %}" data-start-iso="{{ it.started_at|date:'c' }}" data-finish-iso="{{ it.finished_at|date:'c' }}" style="border-color:#e3e6eb;">
+            <div class="interaction-content mt-2">
+              <div>
+            {% if it.screenshot_url %}
+                <div class="screenshot-wrap"
+                     data-turn="{{ it.turn_index }}"
+                 data-action-type="{{ it.action.type|default:'' }}"
+                 data-click-x="{{ it.action.params.x|default:'' }}"
+                 data-click-y="{{ it.action.params.y|default:'' }}"
+                 data-type-text="{{ it.action.params.text|default_if_none:'' }}"
+                 data-keys="{% if it.action.params.keys %}{{ it.action.params.keys|join:' + ' }}{% endif %}"
+                 data-scroll-x="{{ it.action.params.scroll_x|default_if_none:'' }}"
+                 data-scroll-y="{{ it.action.params.scroll_y|default_if_none:'' }}"
+                     data-drag-path='{{ it.action.params.path|default_if_none:""|escapejs }}'
+                 data-action-raw='{{ it.action|escapejs }}'>
+                  <img src="{{ it.screenshot_url|add:'' }}" loading="lazy" class="img-fluid rounded border screenshot-img" style="max-height:420px; cursor:default;" alt="screenshot">
+              <div class="overlay"></div>
+            </div>
+            {% endif %}
+              </div>
+              <div class="interaction-details">
+                <div class="section small d-flex align-items-center gap-2"><strong>Turn #{{ it.turn_index }}</strong>{% if it.action and it.action.status %}<span class="badge-status {{ it.action.status|lower }}">{{ it.action.status }}</span>{% endif %}</div>
+                
+                <div class="section">
+                  <strong>Reasoning:</strong>
+                  <span class="clamp" data-full="{{ it.reasoning_summary|default:'-'|escapejs }}">{{ it.reasoning_summary|default:'-' }}</span>
+                  <a class="clamp-toggle ms-2 text-decoration-underline" href="#" role="button" aria-expanded="false" style="display:none;">Show more</a>
+                </div>
+                {% if it.message_text %}
+                <div class="section">
+                  <strong>Message:</strong> {{ it.message_text }}
+                </div>
+                {% endif %}
+                {% if it.action and it.action.type %}
+                <div class="section small d-flex align-items-center gap-2 flex-wrap">
+                  <strong>Action:</strong>
+                  <span class="badge-action action-{{ it.action.type|lower }}" data-action-type="{{ it.action.type|lower }}">{{ it.action.type|lower }}</span>
+                </div>
+                {% endif %}
+                <div class="section meta-bar">
+                  {% if it.tokens_in_fmt or it.tokens_out_fmt %}
+                  <span class="chip chip-muted" title="Token usage">
+                    <i class="bi bi-cpu"></i>
+                    <span>#In-Tokens: <strong>{{ it.tokens_in_fmt|default:'-' }}</strong> · #Out-Tokens: <strong>{{ it.tokens_out_fmt|default:'-' }}</strong></span>
+                  </span>
+                  {% endif %}
+                </div>
+                <div class="section meta-bar">
+                  <span class="chip chip-muted" title="Start → End">
+                    <i class="bi bi-clock-history"></i>
+                    <span>{{ it.started_at }} → {{ it.finished_at }} ({{ it.elapsed_s|floatformat:1 }}s)</span>
+                  </span>
+                  <span class="chip chip-muted delta-chip" title="Time since previous step" data-delta-for="{{ it.turn_index }}" style="display:none;">
+                    <i class="bi bi-arrow-right-short"></i>
+                    <span class="delta-label">Δt: <strong class="delta-seconds">0.0</strong>s</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="text-muted">No interactions recorded.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Copy Toast -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="copyToast" class="toast align-items-center text-bg-light border-0" role="status" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center"><i class="bi bi-clipboard-check me-2 text-success"></i>Detailed summary copied</div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    console.log('[run_detail] copy script init');
+    const btn = document.getElementById('copyDetailedBtn');
+    const textEl = document.getElementById('detailedSummaryText');
+    const toastEl = document.getElementById('copyToast');
+    if (btn && textEl) {
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        try {
+          console.log('[run_detail] copy click');
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(textEl);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          let ok = false;
+          try { ok = document.execCommand('copy'); } catch(err) { console.error('[run_detail] execCommand error', err); }
+          selection.removeAllRanges();
+          const icon = this.querySelector('i');
+          if (icon) { icon.classList.remove('bi-clipboard'); icon.classList.add('bi-clipboard-check'); }
+          try {
+            if (toastEl && window.bootstrap && bootstrap.Toast) {
+              const t = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 1400 });
+              t.show();
+            } else if (toastEl) {
+              toastEl.classList.add('show');
+              toastEl.style.display = 'block';
+              setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.style.display = 'none'; }, 1400);
+            }
+          } catch(err) { console.error('[run_detail] toast error', err); }
+          setTimeout(()=>{ if (icon) { icon.classList.remove('bi-clipboard-check'); icon.classList.add('bi-clipboard'); } }, 1400);
+        } catch(err) {
+          console.error('[run_detail] copy handler error', err);
+        }
+      });
+    } else {
+      console.warn('[run_detail] copy elements missing', { btn: !!btn, text: !!textEl });
+    }
+  })();
+  </script>
+  <script>
+  (function(){
+    try {
+      const reqId = parseInt('{{ requirement.id }}', 10);
+      const thisRunId = parseInt('{{ run.id }}', 10);
+      if (!Number.isFinite(reqId) || !Number.isFinite(thisRunId)) return;
+      const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+      let ws = null;
+      function openSocket(){
+        try { if (ws) { try { ws.close(); } catch(e){} } } catch(e){}
+        ws = new WebSocket(`${proto}://${location.host}/ws/runs/${reqId}/`);
+        ws.onmessage = function(ev){
+          try {
+            const msg = JSON.parse(ev.data);
+            if (msg && msg.phase === 'finished' && parseInt(msg.run_id, 10) === thisRunId){
+              // Full reload to reflect final decision and updated acceptance states
+              window.location.reload();
+            }
+          } catch(e) {}
+        };
+        ws.onclose = function(){
+          // Optional: do not reconnect after finished; modest backoff if needed
+        };
+      }
+      openSocket();
+    } catch(e) {}
+  })();
+  </script>
+
+  <!-- Lightbox for screenshots -->
+  <div id="lightboxBackdrop" class="lightbox-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lightbox">
+      <div class="lightbox-toolbar">
+        <div class="d-flex align-items-center gap-2">
+          <button id="lbToggleOverlay" class="btn btn-sm btn-light">Toggle overlays</button>
+        </div>
+        <button id="lbClose" class="btn btn-sm btn-outline-light">Close</button>
+      </div>
+      <div id="lbWrap" class="screenshot-wrap">
+        <img id="lbImg" src="" alt="screenshot preview" class="screenshot-img">
+        <div class="overlay"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    // Clamp toggle logic
+    function initClamps(){
+      document.querySelectorAll('.clamp').forEach(function(el){
+        const text = el.textContent || '';
+        if (text.trim().length < 160) { return; }
+        const toggle = el.parentElement.querySelector('.clamp-toggle');
+        if (toggle){
+          toggle.style.display = 'inline';
+          let expanded = false;
+          toggle.addEventListener('click', function(e){
+            e.preventDefault();
+            expanded = !expanded;
+            if (expanded){
+              el.classList.remove('clamp');
+              toggle.textContent = 'Show less';
+            } else {
+              el.classList.add('clamp');
+              toggle.textContent = 'Show more';
+            }
+          });
+        }
+      });
+    }
+
+    // Lightbox logic
+    const backdrop = document.getElementById('lightboxBackdrop');
+    const lbWrap = document.getElementById('lbWrap');
+    const lbImg = document.getElementById('lbImg');
+    const btnClose = document.getElementById('lbClose');
+    const btnToggleOverlay = document.getElementById('lbToggleOverlay');
+    let currentWrap = null;
+
+    function openLightbox(wrap){
+      const img = wrap.querySelector('.screenshot-img');
+      if (!img) return;
+      currentWrap = wrap;
+      // Copy relevant data attributes to modal wrap so overlays can render
+      try {
+        const attrs = ['data-action-type','data-click-x','data-click-y','data-type-text','data-keys','data-scroll-x','data-scroll-y','data-drag-path','data-action-raw','data-turn'];
+        attrs.forEach((k)=>{
+          const v = wrap.getAttribute(k);
+          if (v != null) lbWrap.setAttribute(k, v); else lbWrap.removeAttribute(k);
+        });
+      } catch(_) {}
+      lbImg.src = img.src;
+      // Mark as renderable so ResizeObserver can retrigger in modal
+      try { lbWrap.setAttribute('data-rendered','1'); } catch(_) {}
+      // Show modal first so layout sizes are non-zero
+      backdrop.style.display = 'flex';
+      backdrop.setAttribute('aria-hidden', 'false');
+      // Render overlays in modal once visible and image is ready
+      const renderFn = (window.__renderInteractionOverlay||function(){ });
+      try {
+        console.log('[lightbox] data attrs', {
+          type: lbWrap.getAttribute('data-action-type'),
+          clickX: lbWrap.getAttribute('data-click-x'),
+          clickY: lbWrap.getAttribute('data-click-y'),
+          keys: lbWrap.getAttribute('data-keys'),
+          path: lbWrap.getAttribute('data-drag-path')
+        });
+      } catch(_) {}
+      if (lbImg.complete) {
+        requestAnimationFrame(()=>{ try { renderFn(lbWrap); } catch(e){ console.warn('[lightbox] render error', e); } });
+      } else {
+        lbImg.addEventListener('load', ()=> requestAnimationFrame(()=>{ try { renderFn(lbWrap); } catch(e){ console.warn('[lightbox] render error', e); } }), { once: true });
+      }
+    }
+    function closeLightbox(){
+      backdrop.style.display = 'none';
+      backdrop.setAttribute('aria-hidden', 'true');
+      lbImg.src = '';
+    }
+    function toggleOverlay(){
+      // Toggle both original and modal overlays (if present)
+      try {
+        if (currentWrap){
+          const ov = currentWrap.querySelector('.overlay');
+          if (ov){ const isHidden = ov.style.display === 'none'; ov.style.display = isHidden ? '' : 'none'; }
+        }
+        if (lbWrap){
+          const ov2 = lbWrap.querySelector('.overlay');
+          if (ov2){ const isHidden2 = ov2.style.display === 'none'; ov2.style.display = isHidden2 ? '' : 'none'; }
+        }
+      } catch(_) {}
+    }
+
+    function initLightbox(){
+      // Disabled click-to-open for images per request
+      // Intentionally do not bind click handlers on .screenshot-img
+      btnClose && btnClose.addEventListener('click', closeLightbox);
+      backdrop && backdrop.addEventListener('click', function(e){ if (e.target === backdrop) closeLightbox(); });
+      btnToggleOverlay && btnToggleOverlay.addEventListener('click', toggleOverlay);
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeLightbox(); });
+    }
+
+    function init(){
+      initClamps();
+      initLightbox();
+    }
+    try { window.__renderInteractionOverlay = renderWrap; } catch(_) {}
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
+  </script>
+  <script>
+  (function(){
+    const ORIG_W = 1280, ORIG_H = 800;
+    let lastClick = null; // stores last click coords in original space {x,y}
+     const overlayColorByType = {
+      click: { ring: '#dc3545', bg: 'rgba(220,53,69,0.25)', icon: '#dc3545' },
+      right_click: { ring: '#6f42c1', bg: 'rgba(111,66,193,0.25)', icon: '#6f42c1' },
+      double_click: { ring: '#dc3545', bg: 'rgba(220,53,69,0.25)', icon: '#dc3545' },
+      type: { ring: '#20c997', bg: 'rgba(32,201,151,0.25)', icon: '#20c997' },
+      keypress: { ring: '#20c997', bg: 'rgba(32,201,151,0.25)', icon: '#20c997' },
+      scroll: { ring: '#0d6efd', bg: 'rgba(13,110,253,0.25)', icon: '#0d6efd' },
+      drag: { ring: '#f97316', bg: 'rgba(249,115,22,0.22)', icon: '#f97316' },
+      move: { ring: '#6c757d', bg: 'rgba(108,117,125,0.22)', icon: '#6c757d' }
+    };
+     // Align overlay label colors with badge styles
+     const badgeStyleByType = {
+       click: { bg: '#fdecea', border: '#ffcfcc', text: '#842029' },
+       right_click: { bg: '#efe7ff', border: '#e2d9f3', text: '#6f42c1' },
+       double_click: { bg: '#fdecea', border: '#ffcfcc', text: '#842029' },
+       type: { bg: '#e6fcf5', border: '#c3f9ea', text: '#0f5132' },
+       keypress: { bg: '#e6fcf5', border: '#c3f9ea', text: '#0f5132' },
+       scroll: { bg: '#e7f1ff', border: '#cfe2ff', text: '#0d6efd' },
+       drag: { bg: '#fff3e8', border: '#ffe4cc', text: '#ad4b00' },
+       move: { bg: '#f1f3f5', border: '#e9ecef', text: '#495057' }
+     };
+    function safeParseJSONLike(s){
+      try {
+        if (!s) return null;
+        let t = String(s)
+          .replace(/\\u0027/g, "'")
+          .replace(/\\u0022/g, '"')
+          .replace(/&quot;/g, '"')
+          .replace(/&#x27;/g, "'");
+        // Convert single-quoted JSON-like to standard JSON
+        if (t.indexOf("'") !== -1 && t.indexOf('"') === -1){
+          t = t.replace(/'/g, '"');
+        }
+        // Python literals → JSON
+        t = t.replace(/\bNone\b/g, 'null').replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
+        return JSON.parse(t);
+      } catch(err){
+        console.warn('[safeParseJSONLike] failed', { input: s, error: String(err) });
+        return null;
+      }
+    }
+    function placeAt(img, x, y){
+      const w = img.clientWidth, h = img.clientHeight;
+      if (!w || !h) return { left: 0, top: 0 };
+      return { left: (x/ORIG_W)*w, top: (y/ORIG_H)*h };
+    }
+    function renderWrap(wrap){
+      try {
+        const type = (wrap.getAttribute('data-action-type') || '').toLowerCase();
+        const img = wrap.querySelector('.screenshot-img');
+        const overlay = wrap.querySelector('.overlay');
+        if (!img || !overlay) { return; }
+        overlay.innerHTML = '';
+        // Concise params log
+        try {
+          const raw = wrap.getAttribute('data-action-raw') || '';
+          const obj = safeParseJSONLike(raw) || {};
+          let p = obj && obj.params ? obj.params : {};
+          console.log(`[action] ${type || 'unknown'} -> ${JSON.stringify(p)}`);
+          console.log('[action-raw]', raw);
+        } catch(_) {}
+        // Render by type
+        if (type === 'click' || type === 'right_click'){
+          let x = parseFloat(wrap.getAttribute('data-click-x')); let y = parseFloat(wrap.getAttribute('data-click-y'));
+          if (!isFinite(x) || !isFinite(y)) { x = ORIG_W*0.5; y = ORIG_H*0.5; }
+          lastClick = { x, y };
+          const { left, top } = placeAt(img, x, y);
+          const m = document.createElement('div'); m.className = 'click-marker'; m.style.left = (left+4)+'px'; m.style.top = (top+10)+'px';
+          const ring = document.createElement('div'); ring.className = 'ring'; const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; ring.style.borderColor = colors.ring; ring.style.backgroundColor = colors.bg;
+          const icon = document.createElement('i'); icon.className = type === 'right_click' ? 'fa-solid fa-computer-mouse icon' : 'fa-solid fa-hand-pointer icon'; icon.style.color = colors.icon;
+          m.appendChild(ring); m.appendChild(icon);
+          m.title = `click at (${Math.round(x)}, ${Math.round(y)})`;
+          overlay.appendChild(m);
+          return;
+        }
+        if (type === 'double_click'){
+          const raw = wrap.getAttribute('data-action-raw') || '';
+          let s = raw.replace(/\\u0027/g, "'").replace(/'/g, '"');
+          let x=ORIG_W*0.5, y=ORIG_H*0.5; try { const obj = JSON.parse(s); if (obj.params){ x = obj.params.x ?? x; y = obj.params.y ?? y; } } catch(_e) {}
+          lastClick = { x, y };
+          const { left, top } = placeAt(img, x, y);
+          const m = document.createElement('div'); m.className = 'click-marker'; m.style.left = (left+4)+'px'; m.style.top = (top+10)+'px';
+          const ring = document.createElement('div'); ring.className = 'ring'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; ring.style.borderColor = colors.ring; ring.style.backgroundColor = colors.bg; const _=colors; }
+          const icon = document.createElement('i'); icon.className = 'fa-solid fa-hand-pointer icon'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; icon.style.color = colors.icon; const _=colors; }
+          const badge = document.createElement('span'); badge.className = 'double-badge'; badge.textContent = '×2';
+          m.appendChild(ring); m.appendChild(icon); m.appendChild(badge);
+          m.title = `double-click at (${Math.round(x)}, ${Math.round(y)})`;
+          overlay.appendChild(m); return;
+        }
+        if (type === 'type'){
+          const txt = (wrap.getAttribute('data-type-text') || '').toString();
+          const yOffset = 0; // tweakable
+          const ringMarker = document.createElement('div'); ringMarker.className = 'click-marker marker-large';
+          let baseX = ORIG_W*0.5, baseY = ORIG_H*0.5; if (lastClick){ baseX = lastClick.x; baseY = lastClick.y; }
+          const pos = placeAt(img, baseX, baseY);
+          ringMarker.style.left = (pos.left+6) + 'px';
+          ringMarker.style.top = (pos.top + yOffset) + 'px';
+          const ring = document.createElement('div'); ring.className = 'ring'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; ring.style.borderColor = colors.ring; ring.style.backgroundColor = colors.bg; }
+          const icon = document.createElement('i'); icon.className = 'fa-solid fa-i-cursor icon'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; icon.style.color = colors.icon; }
+          ringMarker.appendChild(ring); ringMarker.appendChild(icon);
+          overlay.appendChild(ringMarker);
+          const lbl = document.createElement('div'); lbl.className = 'label-badge';
+          lbl.textContent = txt.length>28 ? (txt.slice(0,28)+'…') : txt;
+          lbl.style.left = (pos.left + 38) + 'px';
+          lbl.style.top = (pos.top + yOffset - 8) + 'px';
+          // Color label to match badge style
+          try {
+            const b = badgeStyleByType[type] || {};
+            if (b.border) lbl.style.borderColor = b.border;
+            if (b.bg) lbl.style.backgroundColor = b.bg;
+            if (b.text) lbl.style.color = b.text;
+          } catch(_) {}
+          overlay.appendChild(lbl);
+          ringMarker.title = `type: ${txt}`;
+          return;
+        }
+        if (type === 'keypress'){
+          const keysStr = (wrap.getAttribute('data-keys') || '').toString();
+          const yOffset = 0; // tweakable
+          const xOffset = 100; // tweakable: move horizontally to the right
+          let baseX = ORIG_W*0.5, baseY = ORIG_H*0.5; if (lastClick){ baseX = lastClick.x; baseY = lastClick.y; }
+          const pos = placeAt(img, baseX, baseY);
+          const ringMarker = document.createElement('div'); ringMarker.className = 'click-marker marker-large';
+          ringMarker.style.left = (pos.left + 6 + xOffset) + 'px';
+          ringMarker.style.top = (pos.top + yOffset) + 'px';
+          const ring = document.createElement('div'); ring.className = 'ring'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; ring.style.borderColor = colors.ring; ring.style.backgroundColor = colors.bg; }
+          const icon = document.createElement('i'); icon.className = 'fa-solid fa-keyboard icon'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; icon.style.color = colors.icon; }
+          ringMarker.appendChild(ring); ringMarker.appendChild(icon);
+          overlay.appendChild(ringMarker);
+          const lbl = document.createElement('div'); lbl.className = 'label-badge';
+          lbl.textContent = keysStr;
+          lbl.style.left = (pos.left + 38 + xOffset) + 'px';
+          lbl.style.top = (pos.top + yOffset - 8) + 'px';
+          // Color label to match badge style (align with badge-action.action-keypress)
+          try {
+            const b = badgeStyleByType[type] || {};
+            if (b.border) lbl.style.borderColor = b.border;
+            if (b.bg) lbl.style.backgroundColor = b.bg;
+            if (b.text) lbl.style.color = b.text;
+          } catch(_) {}
+          overlay.appendChild(lbl);
+          ringMarker.title = `keys: ${keysStr}`;
+          console.log('[keypress] keys', keysStr, 'at', pos);
+          return;
+        }
+        if (type === 'move'){
+          const raw = wrap.getAttribute('data-action-raw') || '';
+          let s = raw.replace(/\\u0027/g, "'").replace(/'/g, '"');
+          let x=ORIG_W*0.5, y=ORIG_H*0.5; try { const obj = JSON.parse(s); if (obj.params){ x = obj.params.x ?? x; y = obj.params.y ?? y; } } catch(_e) {}
+          const { left, top } = placeAt(img, x, y);
+          const m = document.createElement('div'); m.className = 'click-marker'; m.style.left = (left+4)+'px'; m.style.top = (top+10)+'px';
+          const ring = document.createElement('div'); ring.className = 'ring'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; ring.style.borderColor = colors.ring; ring.style.backgroundColor = colors.bg; const _=colors; }
+          const icon = document.createElement('i'); icon.className = 'fa-solid fa-location-crosshairs icon'; { const colors = overlayColorByType[type] || { ring:'#dc3545', bg:'rgba(220,53,69,0.25)', icon:'#dc3545' }; icon.style.color = colors.icon; const _=colors; }
+          m.appendChild(ring); m.appendChild(icon);
+          m.title = `move to (${Math.round(x)}, ${Math.round(y)})`;
+          overlay.appendChild(m); return;
+        }
+        if (type === 'scroll'){
+          const raw = wrap.getAttribute('data-action-raw') || '';
+          let sy = parseFloat(wrap.getAttribute('data-scroll-y'));
+          if (!Number.isFinite(sy)){
+            let s = raw.replace(/\\u0027/g, "'").replace(/'/g, '"');
+            try { const obj = JSON.parse(s); sy = (obj.params && typeof obj.params.scroll_y === 'number') ? obj.params.scroll_y : 0; } catch(_e) { sy = 0; }
+          }
+          const el = document.createElement('div'); el.className = 'scroll-marker';
+          const dir = (sy||0) < 0 ? 'up' : 'down';
+          el.innerHTML = dir === 'down' ? '<i class="fa-solid fa-arrow-down-long"></i><span>scroll</span>' : '<i class="fa-solid fa-arrow-up-long"></i><span>scroll</span>';
+          el.style.background = (overlayColorByType.scroll && overlayColorByType.scroll.ring) || '#dc3545';
+          el.title = `scroll ${dir} (${Math.round(sy)})`;
+          overlay.appendChild(el); return;
+        }
+        if (type === 'drag'){
+          const turn = wrap.getAttribute('data-turn') || '?';
+          // Prefer explicit data attribute if provided
+          let path = [];
+          try {
+            const dataPath = wrap.getAttribute('data-drag-path');
+            console.log('[drag] raw data-drag-path', dataPath);
+            const maybe = safeParseJSONLike(dataPath);
+            if (Array.isArray(maybe)) path = maybe;
+          } catch(_) {}
+          console.log('[drag] turn', turn, 'parsed from data-drag-path:', path);
+          if (!path.length){
+          const raw = wrap.getAttribute('data-action-raw') || '';
+            const obj = safeParseJSONLike(raw) || {};
+            path = obj.params && Array.isArray(obj.params.path) ? obj.params.path : [];
+            console.log('[drag] turn', turn, 'fallback parsed from data-action-raw:', path);
+          }
+          if (path.length >= 2){
+            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('class','drag-svg');
+            const imgW = img.clientWidth, imgH = img.clientHeight; if (!imgW || !imgH) { overlay.appendChild(svg); return; }
+            const first = path[0];
+            const last = path[path.length-1];
+            const sdx = (first.x/ORIG_W)*imgW, sdy = (first.y/ORIG_H)*imgH;
+            const edx = (last.x/ORIG_W)*imgW, edy = (last.y/ORIG_H)*imgH;
+            console.log('[drag] turn', turn, 'scaled coords', { sdx, sdy, edx, edy, imgW, imgH });
+            // Arrow line
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg','line');
+            arrow.setAttribute('x1', sdx); arrow.setAttribute('y1', sdy);
+            arrow.setAttribute('x2', edx); arrow.setAttribute('y2', edy);
+            arrow.setAttribute('stroke', (overlayColorByType.drag && overlayColorByType.drag.ring) || '#dc3545');
+            arrow.setAttribute('stroke-width', '4');
+            arrow.setAttribute('stroke-linecap', 'round');
+            arrow.setAttribute('filter', 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))');
+            svg.appendChild(arrow);
+            // Arrow head
+            const angle = Math.atan2(edy - sdy, edx - sdx);
+            const headLen = 16; // pixels
+            const hx1 = edx - headLen * Math.cos(angle - Math.PI/7);
+            const hy1 = edy - headLen * Math.sin(angle - Math.PI/7);
+            const hx2 = edx - headLen * Math.cos(angle + Math.PI/7);
+            const hy2 = edy - headLen * Math.sin(angle + Math.PI/7);
+            const head1 = document.createElementNS('http://www.w3.org/2000/svg','line');
+            head1.setAttribute('x1', edx); head1.setAttribute('y1', edy);
+            head1.setAttribute('x2', hx1); head1.setAttribute('y2', hy1);
+            head1.setAttribute('stroke', (overlayColorByType.drag && overlayColorByType.drag.ring) || '#dc3545'); head1.setAttribute('stroke-width', '4'); head1.setAttribute('stroke-linecap', 'round');
+            const head2 = document.createElementNS('http://www.w3.org/2000/svg','line');
+            head2.setAttribute('x1', edx); head2.setAttribute('y1', edy);
+            head2.setAttribute('x2', hx2); head2.setAttribute('y2', hy2);
+            head2.setAttribute('stroke', (overlayColorByType.drag && overlayColorByType.drag.ring) || '#dc3545'); head2.setAttribute('stroke-width', '4'); head2.setAttribute('stroke-linecap', 'round');
+            svg.appendChild(head1); svg.appendChild(head2);
+            const len = Math.hypot(edx - sdx, edy - sdy);
+            svg.setAttribute('title', `drag (${Math.round(path.length)} pts, len=${Math.round(len)})`);
+            overlay.appendChild(svg); return;
+          }
+          console.warn('[drag] turn', turn, 'no path to draw');
+        }
+        // Unknown: do nothing
+      } catch(err) { /* silent */ }
+    }
+    function init(){
+      const container = document.getElementById('interactionsBody');
+      const wraps = document.querySelectorAll('.screenshot-wrap');
+      if ('IntersectionObserver' in window && container){
+        const io = new IntersectionObserver((entries)=>{
+          entries.forEach((en)=>{
+            if (en.isIntersecting){
+              const wrap = en.target;
+              if (!wrap.getAttribute('data-rendered')){
+                renderWrap(wrap);
+                wrap.setAttribute('data-rendered','1');
+              }
+            }
+          });
+        }, { root: container, threshold: 0.1 });
+        wraps.forEach((wrap)=> io.observe(wrap));
+      } else {
+        wraps.forEach((wrap)=>{
+        const img = wrap.querySelector('.screenshot-img');
+        if (!img) { return; }
+          if (img.complete) renderWrap(wrap); else img.addEventListener('load', () => renderWrap(wrap), { once: true });
+        });
+      }
+      if ('ResizeObserver' in window){
+        const ro = new ResizeObserver((entries)=>{
+          entries.forEach((en)=>{
+            const wrap = en.target.closest('.screenshot-wrap');
+            if (wrap && wrap.getAttribute('data-rendered')) renderWrap(wrap);
+          });
+        });
+        document.querySelectorAll('.screenshot-img').forEach((img)=> ro.observe(img));
+      } else {
+        window.addEventListener('resize', ()=>{
+          document.querySelectorAll('.screenshot-wrap[data-rendered="1"]').forEach((wrap)=> renderWrap(wrap));
+        });
+      }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
+  </script>
+  <script>
+  (function(){
+     function initFilters(){
+      const body = document.getElementById('interactionsBody');
+       const actionMenu = document.getElementById('filterActionMenu');
+       const actionLabel = document.getElementById('filterActionLabel');
+       const statusMenu = document.getElementById('filterStatusMenu');
+       const statusLabel = document.getElementById('filterStatusLabel');
+      const search = document.getElementById('filterSearch');
+      const reset = document.getElementById('filterReset');
+       if (!body || !actionMenu || !statusMenu || !actionLabel || !statusLabel || !search || !reset) return;
+      const items = Array.from(body.querySelectorAll('.interaction-item'));
+      const thumbs = Array.from(body.querySelectorAll('.thumb-item'));
+       let selectedAction = '';
+       let selectedStatus = '';
+      function textOfItem(it){
+        const reason = (it.querySelector('[data-full]')?.getAttribute('data-full') || '').toLowerCase();
+        const msg = (it.querySelector('.section strong + *')?.textContent || '').toLowerCase();
+        return reason + ' ' + msg;
+      }
+      function apply(){
+         const a = (selectedAction || '').toLowerCase();
+         const s = (selectedStatus || '').toLowerCase();
+        const hs = false;
+        const q = (search.value || '').trim().toLowerCase();
+        const visibleIds = new Set();
+        items.forEach((it)=>{
+          const itA = (it.getAttribute('data-action-type')||'').toLowerCase();
+          const itS = (it.getAttribute('data-action-status')||'').toLowerCase();
+          const itH = it.getAttribute('data-has-screenshot') === '1';
+          const match = (!a || itA === a) && (!s || itS === s) && (!hs || itH) && (!q || textOfItem(it).indexOf(q) !== -1);
+          it.style.display = match ? '' : 'none';
+          if (match) visibleIds.add(it.id);
+        });
+        thumbs.forEach((th)=>{
+          const target = th.getAttribute('data-target-id');
+          th.style.display = visibleIds.has(target) ? '' : 'none';
+        });
+      }
+       actionMenu.addEventListener('click', function(e){
+         const a = e.target.closest('a[data-value]'); if (!a) return;
+         e.preventDefault();
+         selectedAction = a.getAttribute('data-value') || '';
+         const badge = a.querySelector('.badge, .badge-action');
+         if (badge) actionLabel.innerHTML = badge.outerHTML;
+         apply();
+       });
+       statusMenu.addEventListener('click', function(e){
+         const a = e.target.closest('a[data-value]'); if (!a) return;
+         e.preventDefault();
+         selectedStatus = a.getAttribute('data-value') || '';
+         const badge = a.querySelector('.badge, .badge-status');
+         if (badge) statusLabel.innerHTML = badge.outerHTML;
+         apply();
+       });
+       search.addEventListener('input', apply);
+       reset.addEventListener('click', ()=>{ selectedAction=''; selectedStatus=''; search.value=''; actionLabel.innerHTML = '<span class="badge text-bg-light border">All</span>'; statusLabel.innerHTML = '<span class="badge text-bg-light border">All</span>'; apply(); });
+      apply();
+    }
+
+    function initActiveThumbSync(){
+      const body = document.getElementById('interactionsBody');
+      if (!('IntersectionObserver' in window) || !body) return;
+      const items = Array.from(body.querySelectorAll('.interaction-item'));
+      const thumbsById = new Map();
+      body.querySelectorAll('.thumb-item').forEach((th)=> thumbsById.set(th.getAttribute('data-target-id'), th));
+      let suppress = false; // prevent feedback scroll loops
+      // Click on thumbnail: smooth scroll to target, but don't immediately update active via IO until settled
+      body.querySelectorAll('.thumb-item').forEach((th)=>{
+        th.addEventListener('click', function(e){
+          const targetId = th.getAttribute('data-target-id');
+          const target = targetId ? document.getElementById(targetId) : null;
+          if (!target) return;
+          try { e.preventDefault(); } catch(_) {}
+          suppress = true;
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(()=>{ suppress = false; }, 400);
+        });
+      });
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach((en)=>{
+          if (suppress) return;
+          if (en.isIntersecting){
+            const id = en.target.id;
+            const th = thumbsById.get(id);
+            if (!th) return;
+            body.querySelectorAll('.thumb-item.active').forEach((el)=> el.classList.remove('active'));
+            th.classList.add('active');
+            try {
+              const strip = th.closest('.thumb-strip');
+              if (strip) {
+                const left = Math.max(0, th.offsetLeft - 24);
+                strip.scrollTo({ left, behavior: 'smooth' });
+              }
+            } catch(_) {}
+          }
+        });
+      }, { root: body, threshold: 0.6 });
+      items.forEach((it)=> io.observe(it));
+    }
+
+    function initDeltaTimes(){
+      const body = document.getElementById('interactionsBody');
+      if (!body) return;
+      const items = Array.from(body.querySelectorAll('.interaction-item'));
+      let prevFinish = null;
+      items.forEach((it)=>{
+        const startIso = it.getAttribute('data-start-iso');
+        const finishIso = it.getAttribute('data-finish-iso');
+        const start = startIso ? Date.parse(startIso) : NaN;
+        const finish = finishIso ? Date.parse(finishIso) : NaN;
+        const chip = it.querySelector('.delta-chip');
+        if (chip && !isNaN(start)){
+          let dt = 0;
+          if (prevFinish != null && !isNaN(prevFinish)) dt = Math.max(0, (start - prevFinish)/1000);
+          chip.style.display = '';
+          const val = it.querySelector('.delta-seconds');
+          if (val) val.textContent = (Math.round(dt*10)/10).toFixed(1);
+        }
+        prevFinish = !isNaN(finish) ? finish : prevFinish;
+      });
+    }
+
+    function initLightboxNav(){
+      const backdrop = document.getElementById('lightboxBackdrop');
+      let currentWrap = null;
+      const wraps = Array.from(document.querySelectorAll('.screenshot-wrap'));
+      function openOf(wrap){ currentWrap = wrap; }
+      wraps.forEach((w)=>{
+        const i = w.querySelector('.screenshot-img');
+        if (i) i.addEventListener('click', ()=> openOf(w));
+      });
+      function openNext(delta){
+        if (!currentWrap) return;
+        const arr = wraps;
+        const idx = arr.indexOf(currentWrap);
+        const next = arr[(idx + delta + arr.length) % arr.length];
+        if (!next) return;
+        const ni = next.querySelector('.screenshot-img');
+        if (ni){ ni.click(); currentWrap = next; }
+      }
+      document.addEventListener('keydown', function(e){
+        if (!backdrop || backdrop.getAttribute('aria-hidden') !== 'false') return;
+        if (e.key === 'ArrowRight'){ e.preventDefault(); openNext(1); }
+        if (e.key === 'ArrowLeft'){ e.preventDefault(); openNext(-1); }
+      });
+    }
+
+    function init(){
+      initFilters();
+      initActiveThumbSync();
+      initDeltaTimes();
+      initLightboxNav();
+      // Compute sticky heights for proper offsets and solid backgrounds
+      (function initStickyHeights(){
+        const body = document.getElementById('interactionsBody');
+        if (!body) return;
+        const toolbar = body.querySelector('.interactions-toolbar');
+        const strip = body.querySelector('.thumb-strip');
+        function apply(){
+          try {
+            const th = toolbar ? Math.ceil(toolbar.getBoundingClientRect().height) : 0;
+            body.style.setProperty('--toolbar-h', th + 'px');
+            const sh = strip ? Math.ceil(strip.getBoundingClientRect().height) : 0;
+            body.style.setProperty('--thumb-h', sh + 'px');
+          } catch(_) {}
+        }
+        apply();
+        window.addEventListener('resize', apply);
+        // Re-apply after images load in the strip to capture height changes
+        if (strip){
+          const imgs = strip.querySelectorAll('img');
+          imgs.forEach((im)=>{
+            if (im.complete) return; im.addEventListener('load', apply, { once: true });
+          });
+        }
+      })();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
+  </script>
+</div>
+
+{# No raw JSON shown here; summarized content above #}
+{% endblock %}
+
+

@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+{% block title %}GUISpector{% endblock %}
+{% block content %}
+<div class="container-fluid px-3">
+  <div class="row">
+    <div class="col-md-9">
+      <h1 class="mb-4">Setups Overview</h1>
+    </div>
+  </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<div class="container-fluid px-3">
+    <div class="row g-3 mb-3 align-items-center">
+        <div class="col-md-4 mb-2 mb-md-0">
+            <div class="input-group flex-nowrap">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input id="searchInput" type="text" class="form-control" placeholder="Search setups by name..." aria-label="Search setups">
+            </div>
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+            <div class="input-group flex-nowrap">
+                <span class="input-group-text bg-white"><i class="bi bi-arrow-down-up"></i></span>
+                <select id="sortSelect" class="form-select">
+                    <option value="name">Sort by Name</option>
+                    <option value="created_at">Sort by Date</option>
+                    <option value="num_requirements">Sort by # Requirements</option>
+                    <option value="state">Sort by State</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2 mb-2 mb-md-0">
+            <div class="input-group flex-nowrap">
+                <span class="input-group-text bg-white"><i class="bi bi-check2-square"></i></span>
+                <div class="dropdown flex-grow-1">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex align-items-center justify-content-between" type="button" id="stateFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="stateFilterLabel"><span class="badge bg-secondary">All States</span></span>
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="stateFilterBtn" id="stateFilterMenu" style="min-width: 100%;">
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value=""><span class="badge bg-secondary me-2">All States</span></a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="ready"><span class="badge bg-success me-2">Ready</span></a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="processing"><span class="badge bg-warning text-dark me-2">Processing</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+            <div class="input-group flex-nowrap" id="tagFilterDropdown" data-bs-auto-close="outside">
+                <span class="input-group-text bg-white"><i class="bi bi-tags"></i></span>
+                <div class="dropdown flex-grow-1">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="tagFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="tagFilterLabel">Tags</span>
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="tagFilterBtn" id="tagFilterMenu" style="max-height: 300px; overflow-y: auto;"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 g-4" id="setup-cards"></div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel"><i class="bi bi-trash me-2 text-danger"></i>Delete setup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger d-flex align-items-start" role="alert" style="gap: .5rem;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        This action will permanently delete <strong id="deleteSetupDisplayName">this setup</strong>, including all requirements, runs and interactions. This cannot be undone.
+                    </div>
+                </div>
+                <div id="deleteErrorAlert" class="alert alert-warning d-none" role="alert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="confirmDeleteSpinner" role="status" aria-hidden="true"></span>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+<style>
+  .dropdown-menu, #tagFilterDropdown .dropdown-menu { background-color: #fff !important; }
+  .dropdown-menu .dropdown-item, #tagFilterDropdown .dropdown-menu .dropdown-item { background-color: #fff !important; color: #212529; }
+  .dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus, #tagFilterDropdown .dropdown-menu .dropdown-item:hover, #tagFilterDropdown .dropdown-menu .dropdown-item:focus { background-color: #f8f9fa !important; color: #212529; }
+  #stateFilterBtn, #stateFilterBtn:focus, #stateFilterBtn:hover, #stateFilterBtn:active,
+  #tagFilterBtn, #tagFilterBtn:focus, #tagFilterBtn:hover, #tagFilterBtn:active {
+    background-color: #fff !important; color: #212529; border-color: #ced4da; box-shadow: none;
+  }
+  .tag-chip { background-color: transparent; }
+  .tag-chip:hover { background-color: #f1f3f5; }
+  /* Constrain tag labels in filter items so checkboxes remain visible */
+  #tagFilterMenu .tag-filter-item { gap: .25rem; }
+  #tagFilterMenu .tag-filter-label { display: inline-block; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+  @media (max-width: 576px) {
+    #tagFilterMenu .tag-filter-label { max-width: 120px; }
+  }
+  .setup-action-btn { min-width: 110px; max-width: 110px; width: 110px; height: 32px; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; vertical-align: middle; }
+  /* Shared partial status color - solid orange */
+  .badge-status-partial { background: #f97316; color: #ffffff; border: 1px solid #ea580c; }
+  .badge-status-partial-soft { background: rgba(249,115,22,.10); color: #d97706; border: 1px solid rgba(249,115,22,.45); }
+  .bg-partial { background: rgba(249,115,22,.25) !important; }
+</style>
+
+<script>
+    let allSetups = [];
+    let allPossibleTags = [];
+    let selectedTags = [];
+    let selectedState = '';
+    let pendingDeleteSetupId = null;
+    let deleteModalInstance = null;
+
+    function getCSRFToken() {
+        const name = 'csrftoken=';
+        const decodedCookie = decodeURIComponent(document.cookie || '');
+        const ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1);
+            if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+        }
+        return '';
+    }
+
+    function renderCards(setups) {
+        const container = document.getElementById('setup-cards');
+        container.innerHTML = '';
+        setups.forEach(setup => {
+            const col = document.createElement('div');
+            col.className = 'col';
+            let badgeClass = 'bg-secondary';
+            let badgeText = 'Unknown';
+            if (setup.state === 'ready') { badgeClass = 'bg-success'; badgeText = 'Ready'; }
+            else if (setup.state === 'failed') { badgeClass = 'bg-danger'; badgeText = 'Failed'; }
+            else if (setup.state === 'processing') { badgeClass = 'bg-warning text-dark'; badgeText = 'Processing'; }
+            else if (setup.state === 'pending') { badgeClass = 'bg-info text-dark'; badgeText = 'Pending'; }
+            else if (setup.state === 'started') { badgeClass = 'bg-secondary'; badgeText = 'Started'; }
+
+            const totalRaw = setup.num_requirements || 0;
+            const total = Math.max(1, totalRaw);
+            const met = setup.num_met || 0;
+            const unmet = setup.num_unmet || 0;
+            const error = setup.num_error || 0;
+            let unprocessed = setup.num_unprocessed;
+            const processing = setup.num_processing || 0;
+            // Fallback: derive unprocessed when backend did not include it
+            if (typeof unprocessed !== 'number') {
+                const derived = totalRaw - (met + unmet + error + processing);
+                unprocessed = Math.max(0, derived);
+            }
+            const partial = setup.num_partially_met || 0;
+            const metPct = Math.min(100, Math.round((met / total) * 100));
+            const partialPct = Math.min(100 - metPct, Math.round((partial / total) * 100));
+            const unmetPct = Math.min(100 - metPct - partialPct, Math.round((unmet / total) * 100));
+            const errPct = Math.min(100 - metPct - partialPct - unmetPct, Math.round((error / total) * 100));
+            const unprocPct = Math.min(100 - metPct - partialPct - unmetPct - errPct, Math.round((unprocessed / total) * 100));
+            const procPct = Math.min(100 - metPct - partialPct - unmetPct - errPct - unprocPct, Math.round((processing / total) * 100));
+
+            const screenshotHtml = setup.screenshot ? `<img src="${setup.screenshot}" class="rounded" style="width: 100%; max-height: 180px; object-fit: cover; border: 2.5px solid #bbb;" loading="lazy" alt="Start URL screenshot">` : `<div class="text-muted" style="height: 180px; display:flex; align-items:center; justify-content:center; border: 2.5px dashed #bbb; border-radius: .375rem;">No screenshot</div>`;
+
+            const tagsHtml = (setup.tags && setup.tags.length > 0) ? `<div class="mt-2 d-flex flex-wrap gap-1">${setup.tags.map(tag => `<span class=\"badge rounded-pill text-secondary border tag-chip\">${tag}</span>`).join('')}</div>` : '';
+
+            col.innerHTML = `
+                <div class="card shadow rounded-4 h-100 setup-card" tabindex="0" style="min-height:360px; min-width:370px; transition:box-shadow 0.2s;">
+                    <div class="card-header d-flex align-items-center justify-content-between py-2 px-3" style="background: linear-gradient(90deg, #f8f9fa 60%, #e9ecef 100%); border-top-left-radius:1rem; border-top-right-radius:1rem;">
+                        <span class="fw-bold d-flex align-items-center flex-grow-1" style="min-width:0;">
+                            <span class="text-truncate" style="overflow:hidden;white-space:nowrap;">${setup.name}</span>
+                            <span class="badge ${badgeClass} ms-2 flex-shrink-0" style="font-size:1em;">${badgeText}</span>
+                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-link text-danger p-0 setup-delete-btn" data-setup-id="${setup.id}" title="Delete setup" aria-label="Delete setup">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body pb-2 pt-3">
+                        <div class="d-flex align-items-center mb-2" style="gap: 0.5rem;">
+                            <span class="text-muted small">${setup.created_at} | <span style="font-weight:bold;">${setup.num_requirements}</span> requirements</span>
+                        </div>
+                        <div class="mb-2"><a href="/setups/${setup.id}/" class="text-decoration-none">${screenshotHtml}</a></div>
+                        ${tagsHtml}
+                    </div>
+                    <div class="card-footer p-2">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-success-subtle text-success border border-success d-inline-flex align-items-center ${met === 0 ? 'd-none' : ''}"><i class="bi bi-check-circle-fill me-1"></i><span>Met: <strong>${met}</strong></span></span>
+                            <span class="badge badge-status-partial-soft d-inline-flex align-items-center ${partial === 0 ? 'd-none' : ''}"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met: <strong>${partial}</strong></span></span>
+                            <span class="badge bg-danger-subtle text-danger border border-danger d-inline-flex align-items-center ${unmet === 0 ? 'd-none' : ''}"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet: <strong>${unmet}</strong></span></span>
+                            <span class="badge bg-danger-subtle text-danger border border-danger ${error === 0 ? 'd-none' : ''}">Error: <strong>${error}</strong></span>
+                            <span class="badge bg-secondary-subtle text-dark border border-secondary ${unprocessed === 0 ? 'd-none' : ''}">Unprocessed: <strong>${unprocessed}</strong></span>
+                            <span class="badge bg-warning-subtle text-dark border border-warning ${processing === 0 ? 'd-none' : ''}">Processing: <strong>${processing}</strong></span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: ${metPct}%"></div>
+                            <div class="progress-bar bg-partial ${partialPct === 0 ? 'd-none' : ''}" role="progressbar" style="width: ${partialPct}%"></div>
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: ${unmetPct}%"></div>
+                            <div class="progress-bar bg-danger ${errPct === 0 ? 'd-none' : ''}" role="progressbar" style="width: ${errPct}%"></div>
+                            <div class="progress-bar bg-secondary ${unprocPct === 0 ? 'd-none' : ''}" role="progressbar" style="width: ${unprocPct}%"></div>
+                            <div class="progress-bar bg-warning ${procPct === 0 ? 'd-none' : ''}" role="progressbar" style="width: ${procPct}%"></div>
+                        </div>
+                    </div>
+                </div>`;
+            container.appendChild(col);
+        });
+
+        const addCol = document.createElement('div');
+        addCol.className = 'col';
+        addCol.innerHTML = `
+            <a href="/setups/add/" class="text-decoration-none" tabindex="0" aria-label="Add setup">
+                <div class="card h-100 d-flex align-items-center justify-content-center shadow-sm border-primary border-2" style="min-height: 360px; min-width:370px; transition:box-shadow 0.2s;">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center h-100 w-100">
+                        <div class="display-1 text-primary mb-3">+</div>
+                        <h5 class="card-title text-center">Add Setup</h5>
+                    </div>
+                </div>
+            </a>`;
+        container.appendChild(addCol);
+
+        document.querySelectorAll('.setup-card').forEach(card => {
+            card.addEventListener('focus', () => card.classList.add('shadow-lg'));
+            card.addEventListener('blur', () => card.classList.remove('shadow-lg'));
+            card.addEventListener('mouseenter', () => card.classList.add('shadow-lg'));
+            card.addEventListener('mouseleave', () => card.classList.remove('shadow-lg'));
+        });
+
+        // Bind delete buttons
+        document.querySelectorAll('.setup-delete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const setupId = btn.getAttribute('data-setup-id');
+                if (!setupId) return;
+                // Extract a safe display name from the card content
+                const cardEl = btn.closest('.setup-card');
+                const nameEl = cardEl ? cardEl.querySelector('.text-truncate') : null;
+                const displayName = (nameEl ? nameEl.textContent : '').trim() || 'this setup';
+
+                pendingDeleteSetupId = setupId;
+                const nameTarget = document.getElementById('deleteSetupDisplayName');
+                if (nameTarget) nameTarget.textContent = displayName;
+                const errBox = document.getElementById('deleteErrorAlert');
+                if (errBox) { errBox.classList.add('d-none'); errBox.textContent = ''; }
+                const spinner = document.getElementById('confirmDeleteSpinner');
+                if (spinner) spinner.classList.add('d-none');
+                const confirmBtn = document.getElementById('confirmDeleteBtn');
+                if (confirmBtn) confirmBtn.disabled = false;
+                if (!deleteModalInstance) {
+                    const modalEl = document.getElementById('deleteConfirmModal');
+                    if (modalEl) deleteModalInstance = new bootstrap.Modal(modalEl);
+                }
+                if (deleteModalInstance) deleteModalInstance.show();
+            });
+        });
+    }
+
+    function renderTagFilterOptions(tags) {
+        allPossibleTags = tags;
+        const tagMenu = document.getElementById('tagFilterMenu');
+        tagMenu.innerHTML = tags.map(tag => `
+            <li>
+                <a href="#" class="dropdown-item d-flex align-items-center tag-filter-item" data-value="${tag}" onclick="event.preventDefault();">
+                    <input type="checkbox" class="form-check-input me-2 tag-filter-checkbox" value="${tag}" ${selectedTags.includes(tag) ? 'checked' : ''}>
+                    <span class="tag-filter-label" data-value="${tag}" title="${tag}">${tag}</span>
+                </a>
+            </li>`).join('');
+
+        tagMenu.onclick = function(e) {
+            const checkbox = e.target.closest('.tag-filter-checkbox');
+            const label = e.target.closest('.tag-filter-label');
+            let value = null;
+            if (checkbox) {
+                value = checkbox.value;
+                const idx = selectedTags.indexOf(value);
+                if (checkbox.checked && idx === -1) selectedTags.push(value);
+                else if (!checkbox.checked && idx !== -1) selectedTags.splice(idx, 1);
+                renderTagFilterOptions(allPossibleTags);
+                updateTagFilterLabel();
+                filterAndRender();
+            } else if (label) {
+                value = label.getAttribute('data-value');
+                const idx = selectedTags.indexOf(value);
+                if (idx === -1) selectedTags.push(value); else selectedTags.splice(idx, 1);
+                renderTagFilterOptions(allPossibleTags);
+                updateTagFilterLabel();
+                filterAndRender();
+            }
+        };
+        updateTagFilterLabel();
+    }
+
+    function updateTagFilterLabel() {
+        const label = document.getElementById('tagFilterLabel');
+        if (selectedTags.length === 0) label.textContent = 'Tags';
+        else label.textContent = `${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`;
+    }
+
+    function fetchAndRender() {
+        fetch('/setups/api/list/')
+            .then(response => response.json())
+            .then(data => {
+                // Normalize state to 'ready' when missing
+                allSetups = (data.setups || []).map(s => ({...s, state: s.state || 'ready'}));
+                const tagSet = new Set();
+                data.setups.forEach(s => (s.tags || []).forEach(tag => tagSet.add(tag)));
+                const tags = Array.from(tagSet).sort();
+                renderTagFilterOptions(tags);
+                filterAndRender();
+            });
+    }
+
+    function filterAndRender() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = allSetups.filter(s => (s.name || '').toLowerCase().includes(search));
+        if (selectedState) filtered = filtered.filter(s => s.state === selectedState);
+        if (selectedTags.length > 0) filtered = filtered.filter(s => selectedTags.every(tag => (s.tags || []).includes(tag)));
+        const sortBy = document.getElementById('sortSelect').value;
+        filtered = filtered.slice();
+        filtered.sort((a, b) => {
+            if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+            if (sortBy === 'created_at') return new Date(b.created_at) - new Date(a.created_at);
+            if (sortBy === 'num_requirements') return (b.num_requirements||0) - (a.num_requirements||0);
+            if (sortBy === 'state') return (a.state||'').localeCompare(b.state||'');
+            return 0;
+        });
+        renderCards(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterAndRender);
+    // State dropdown with badges
+    document.getElementById('stateFilterMenu').querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', function(e){
+            e.preventDefault();
+            selectedState = this.getAttribute('data-value');
+            const badge = this.querySelector('.badge').outerHTML;
+            document.getElementById('stateFilterLabel').innerHTML = badge;
+            filterAndRender();
+        });
+    });
+    document.getElementById('sortSelect').addEventListener('change', filterAndRender);
+    fetchAndRender();
+    // Open WebSocket to receive setup state updates
+    (function openSetupsSocket(){
+        try {
+            const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+            const ws = new WebSocket(`${proto}://${location.host}/ws/setups/`);
+            ws.onmessage = (ev) => {
+                try {
+                    const msg = JSON.parse(ev.data);
+                    if (msg && msg.setup_id) {
+                        const idx = allSetups.findIndex(s => String(s.id) === String(msg.setup_id));
+                        if (idx !== -1) {
+                            const patch = { ...allSetups[idx] };
+                            if (msg.state) patch.state = msg.state;
+                            if (typeof msg.num_met === 'number') patch.num_met = msg.num_met;
+                            if (typeof msg.num_unmet === 'number') patch.num_unmet = msg.num_unmet;
+                            if (typeof msg.num_processing === 'number') patch.num_processing = msg.num_processing;
+                            if (typeof msg.num_error === 'number') patch.num_error = msg.num_error;
+                            if (typeof msg.num_unprocessed === 'number') patch.num_unprocessed = msg.num_unprocessed;
+                            allSetups[idx] = patch;
+                            filterAndRender();
+                        }
+                    }
+                } catch(e) {}
+            };
+        } catch(e) {}
+    })();
+    // Ensure overview refreshes when navigating back via browser cache
+    window.addEventListener('pageshow', function(){
+        fetchAndRender();
+    });
+    window.addEventListener('resize', () => renderCards(allSetups));
+
+    // Confirm delete handler (modal)
+    (function bindConfirmDelete() {
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        if (!confirmBtn) return;
+        confirmBtn.addEventListener('click', async () => {
+            const setupId = pendingDeleteSetupId;
+            if (!setupId) return;
+            const spinner = document.getElementById('confirmDeleteSpinner');
+            const errBox = document.getElementById('deleteErrorAlert');
+            confirmBtn.disabled = true;
+            if (spinner) spinner.classList.remove('d-none');
+            if (errBox) { errBox.classList.add('d-none'); errBox.textContent = ''; }
+            try {
+                const resp = await fetch(`/setups/${setupId}/api/delete/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCSRFToken() },
+                });
+                if (!resp.ok) throw new Error('Request failed');
+                // Update UI
+                allSetups = allSetups.filter(s => String(s.id) !== String(setupId));
+                filterAndRender();
+                if (deleteModalInstance) deleteModalInstance.hide();
+                pendingDeleteSetupId = null;
+            } catch (err) {
+                if (errBox) {
+                    errBox.textContent = 'Failed to delete setup. Please try again.';
+                    errBox.classList.remove('d-none');
+                }
+            } finally {
+                if (spinner) spinner.classList.add('d-none');
+                confirmBtn.disabled = false;
+            }
+        });
+    })();
+</script>
+{% endblock %}
+
+

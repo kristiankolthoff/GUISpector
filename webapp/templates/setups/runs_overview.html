@@ -1,0 +1,772 @@
+{% extends 'base.html' %}
+{% block title %}Runs Overview{% endblock %}
+{% block content %}
+<div class="container-fluid px-3">
+  <div class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-body">
+      <div class="d-flex align-items-start justify-content-between flex-nowrap gap-3">
+        <div class="flex-grow-1 min-w-0">
+          <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+            <span class="fs-4 fw-bold mb-0">{{ requirement.title|default:'(no title)' }}{% if requirement.setup and requirement.setup.name %} ({{ requirement.setup.name }}){% endif %}</span>
+            <span id="requirementStatusBadge">
+              {% if requirement.status == 'met' %}
+                <span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>
+              {% elif requirement.status == 'partially_met' %}
+                <span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>
+              {% elif requirement.status == 'unmet' %}
+                <span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>
+              {% elif requirement.status == 'processing' %}
+                <span class="badge bg-warning text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Processing</span></span>
+              {% elif requirement.status == 'error' %}
+                <span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-exclamation-octagon-fill me-1"></i><span>Error</span></span>
+              {% else %}
+                <span class="badge bg-secondary">Unprocessed</span>
+              {% endif %}
+            </span>
+            {% if requirement.priority == 'high' %}
+              <span id="requirementPriorityBadge" class="badge badge-priority-high text-uppercase d-inline-flex align-items-center" style="letter-spacing:.3px;">High</span>
+            {% elif requirement.priority == 'low' %}
+              <span id="requirementPriorityBadge" class="badge badge-priority-low text-uppercase d-inline-flex align-items-center" style="letter-spacing:.3px;">Low</span>
+            {% else %}
+              <span id="requirementPriorityBadge" class="badge badge-priority-medium text-uppercase d-inline-flex align-items-center" style="letter-spacing:.3px;">Medium</span>
+            {% endif %}
+          </div>
+          <div class="text-muted small">Created {{ requirement.created_at|date:'Y-m-d H:i' }}</div>
+          <div class="mt-2">{{ requirement.description|linebreaksbr }}</div>
+          <div class="mt-2 d-flex flex-wrap gap-1">
+            {% for tag in requirement.tags_json %}
+              <span class="badge rounded-pill text-secondary border tag-chip">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% if requirement_ac_list %}
+          <div class="mt-3">
+            <div class="fw-semibold mb-2 d-inline-flex align-items-center"><i class="bi bi-list-check me-2 text-muted"></i><span>Acceptance Criteria</span></div>
+            <div>
+              {% for item in requirement_ac_list %}
+                <div class="summary-block p-3 mb-2 criteria-item {% if item.met == True %}criteria-item-met{% elif item.met == False %}criteria-item-unmet{% endif %}">
+                  <div class="d-flex align-items-start gap-2">
+                    {% if item.met == True %}
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                    {% elif item.met == False %}
+                      <i class="bi bi-x-circle-fill text-danger"></i>
+                    {% else %}
+                      <i class="bi bi-dash-circle-fill text-muted"></i>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                      <div class="fw-semibold">{{ item.criteria }}</div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          <!-- KPI row integrated below tags (left-aligned, like detail.html) -->
+          <div class="d-flex align-items-center gap-2 mt-3 flex-wrap" id="kpiRow" aria-live="polite">
+            <span class="badge bg-success-subtle text-success border border-success kpi-chip d-inline-flex align-items-center" id="kpiMet"><i class="bi bi-check-circle-fill me-1"></i>Met: 0</span>
+            <span class="badge badge-status-partial-soft kpi-chip d-inline-flex align-items-center" id="kpiPartial"><i class="bi bi-slash-circle-fill me-1"></i>Partially met: 0</span>
+            <span class="badge bg-danger-subtle text-danger border border-danger kpi-chip d-inline-flex align-items-center" id="kpiUnmet"><i class="bi bi-x-circle-fill me-1"></i>Unmet: 0</span>
+            <span class="badge bg-warning-subtle text-dark border border-warning kpi-chip d-inline-flex align-items-center d-none" id="kpiProcessing">Processing: 0</span>
+            <span class="badge bg-secondary-subtle text-dark border border-secondary kpi-chip d-inline-flex align-items-center d-none" id="kpiWaiting">Waiting: 0</span>
+            <span class="badge bg-danger text-light border border-danger kpi-chip d-inline-flex align-items-center d-none" id="kpiError">Error: 0</span>
+          </div>
+          <div class="progress mt-2" style="height: 12px; background: #eef1f6;" aria-label="Run status distribution">
+            <div id="kpiMetBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+            <div id="kpiPartialBar" class="progress-bar bg-partial d-none" role="progressbar" style="width: 0%"></div>
+            <div id="kpiUnmetBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+            <div id="kpiErrorBar" class="progress-bar bg-danger d-none" role="progressbar" style="width: 0%"></div>
+            <div id="kpiWaitingBar" class="progress-bar bg-secondary d-none" role="progressbar" style="width: 0%"></div>
+            <div id="kpiProcessingBar" class="progress-bar bg-warning d-none" role="progressbar" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="ms-auto align-self-start flex-shrink-0">
+          <button id="startRunBtn" class="btn btn-primary"><i class="bi bi-play-fill me-1"></i>Start run</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Live run progress modal -->
+<div class="modal fade" id="runLiveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <span>Run progress</span>
+          <span id="liveRunStatus"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3 live-img-wrap" id="liveRunImgWrap">
+          <img id="liveRunImg" class="fade-swap fade-swap-image" src="" alt="Live run screenshot" style="width:100%;height:auto;max-height:60vh;display:block;border-radius:8px;border:1px solid #e3e6eb;background:#f8f9fa;object-fit:contain;">
+        </div>
+        <div class="mb-2 small text-muted d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center"><i class="fa-solid fa-shoe-prints me-1"></i><span>Steps: <strong id="liveRunSteps">0</strong></span></div>
+          <div class="d-flex align-items-center"><i class="bi bi-stopwatch me-1"></i><span>Elapsed: <strong id="liveRunElapsed">0.0</strong>s</span></div>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1">Latest reasoning</div>
+          <pre id="liveRunReason" class="p-3 fade-swap fade-swap-text" style="white-space:pre-wrap;background:#f8f9fa;border:1px solid #e3e6eb;border-radius:8px;min-height:64px;margin:0;"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="toolbar card border-0 shadow-sm rounded-4 p-3 mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input id="searchInput" type="text" class="form-control" placeholder="Search runs by explanation or URL...">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-arrow-down-up"></i></span>
+          <select id="sortSelect" class="form-select">
+            <option value="created_at_desc">Newest first</option>
+            <option value="created_at">Oldest first</option>
+            <option value="elapsed">Shortest duration</option>
+            <option value="elapsed_desc">Longest duration</option>
+            <option value="steps">Fewest steps</option>
+            <option value="steps_desc">Most steps</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-check2-square"></i></span>
+          <div class="dropdown flex-grow-1">
+            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex align-items-center justify-content-between" type="button" id="stateFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
+              <span id="stateFilterLabel"><span class="badge text-bg-light border">All statuses</span></span>
+            </button>
+            <ul class="dropdown-menu w-100" aria-labelledby="stateFilterBtn" id="stateFilterMenu" style="min-width: 100%;">
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value=""><span class="badge text-bg-light border me-2">All statuses</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="processing"><span class="badge bg-warning text-dark me-2">Processing</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="waiting_for_display"><span class="badge bg-secondary text-dark me-2">Waiting for display</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="met"><span class="badge bg-success me-2">Met</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="partially_met"><span class="badge badge-status-partial me-2">Partially met</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="unmet"><span class="badge bg-danger me-2">Unmet</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="error"><span class="badge bg-danger me-2">Error</span></a></li>
+            </ul>
+            <select id="statusFilter" class="form-select d-none">
+              <option value="" selected>All statuses</option>
+              <option value="processing">Processing</option>
+              <option value="waiting_for_display">Waiting for display</option>
+              <option value="met">Met</option>
+              <option value="partially_met">Partially met</option>
+              <option value="unmet">Unmet</option>
+              <option value="error">Error</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="runsList" class="list-group"></div>
+  <div id="emptyState" class="text-center text-muted py-5 d-none">
+    <div class="display-6 mb-2"><i class="bi bi-activity"></i></div>
+    <div class="mb-2">No runs match your filters.</div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  /* (Removed status strip for top card) */
+  .run-item { border: 1px solid #e3e6eb; border-radius: 14px; margin-bottom: 12px; position: relative; }
+  .run-item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 14px 0 0 14px; background: #ced4da; }
+  .run-item[data-status="met"]::before { background: #198754; }
+  .run-item[data-status="partially_met"]::before { background: #f97316; }
+  .run-item[data-status="unmet"]::before { background: #dc3545; }
+  .run-item[data-status="processing"]::before { background: #ffc107; }
+  .run-item[data-status="error"]::before { background: #dc3545; }
+  .badge-status-met { background: #e6f4ea; color: #146c43; border: 1px solid #c6e6cf; }
+  .badge-status-partial { background: #f97316; color: #ffffff; border: 1px solid #ea580c; }
+  .badge-status-notmet { background: #fdecea; color: #842029; border: 1px solid #ffcfcc; }
+  .badge-status-processing { background: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+  .badge-status-error { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+  .run-thumb { width: 128px; height: 80px; object-fit: cover; border-radius: 8px; border:1px solid #e3e6eb; background:#f8f9fa; cursor: zoom-in; }
+  .tag-chip { background-color: transparent; }
+  .tag-chip:hover { background-color: #f1f3f5; }
+  .bg-partial { background: rgba(249, 115, 22, 0.25) !important; }
+  /* KPI header styles (align with setup detail) */
+  .kpi-chip { cursor: pointer; user-select: none; }
+  .badge-status-partial-soft { background: rgba(249, 115, 22, 0.10); color: #d97706; border: 1px solid rgba(249, 115, 22, 0.45); }
+  /* Priority badges (match detail.html) */
+  .badge-priority-low { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+  .badge-priority-medium { background: #fff3cd; color: #7a5d00; border: 1px solid #ffe69c; }
+  .badge-priority-high { background: #fdecea; color: #842029; border: 1px solid #ffcfcc; }
+  /* Shared gray summary block (match run_detail) */
+  .summary-block { background: #f8f9fa; border: 1px solid #e3e6eb; border-radius: 12px; padding: 12px; }
+  .criteria-item { border: 1px solid #e3e6eb; border-radius: 12px; }
+  .criteria-item-met { background: #e6f4ea; border-color: #c6e6cf; }
+  .criteria-item-unmet { background: #fdecea; border-color: #ffcfcc; }
+  /* Ensure status and priority badges align perfectly */
+  #requirementStatusBadge .badge,
+  #requirementPriorityBadge { display:inline-flex; align-items:center; vertical-align:middle; line-height:1; padding-top:.35em; padding-bottom:.35em; }
+  /* Index bubble and truncation utilities */
+  .num-circle { width: 36px; height: 36px; border-radius: 50%; background: #f1f3f5; display:flex; align-items:center; justify-content:center; font-weight:700; color:#6c757d; }
+  .text-truncate-1 { display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .run-item.is-clickable { transition: box-shadow .2s, transform .05s; }
+  .run-item.is-clickable:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.06); transform: translateY(-1px); }
+  .link-muted { color: inherit; text-decoration: none; cursor: pointer; }
+  .link-muted:hover, .link-muted:focus { text-decoration: underline; color: inherit; }
+  /* Keep dropdown items white on hover to match detail.html */
+  .dropdown-menu { background-color: #fff !important; }
+  .dropdown-menu .dropdown-item { background-color: #fff !important; color: #212529; }
+  .dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus { background-color: #fff !important; color: #212529; }
+  .dropdown-menu .dropdown-item.active, .dropdown-menu .dropdown-item:active { background-color: #fff !important; color: #212529 !important; }
+  /* Keep the toggle button white */
+  #stateFilterBtn, #stateFilterBtn:focus, #stateFilterBtn:hover, #stateFilterBtn:active {
+    background-color: #fff !important; color: #212529; border-color: #ced4da; box-shadow: none;
+  }
+  /* Live modal: tighten vertical chrome and offset from app header */
+  #runLiveModal .modal-dialog { margin-top: 56px; }
+  #runLiveModal .modal-header { padding: .5rem .75rem; }
+  #runLiveModal .modal-title { font-size: 1rem; }
+  #runLiveModal .modal-body { padding-top: .75rem; padding-bottom: .75rem; }
+  /* Smooth content swap animation */
+  .fade-swap { transition: opacity .25s ease; will-change: opacity; }
+  .fade-swap.is-fading { opacity: .15; }
+  .fade-swap-image { transition: opacity 1.2s ease-in-out; }
+  .fade-swap-image.is-fading { opacity: .05; }
+  .fade-swap-text { transition: opacity .6s ease; }
+  .fade-swap-text.is-fading { opacity: .3; }
+  /* Crossfade using two stacked images to ensure smooth perception on cached loads */
+  .live-img-wrap { position: relative; }
+  .live-img-wrap img { display:block; }
+  .live-img-wrap .ghost-img { position:absolute; inset:0; width:100%; height:100%; border-radius:8px; border:1px solid #e3e6eb; background:#f8f9fa; object-fit:contain; opacity:0; transition: opacity 1.2s ease-in-out; pointer-events:none; }
+  .live-img-wrap .ghost-img.is-visible { opacity:1; }
+</style>
+
+<script>
+  (function(){
+    const reqId = parseInt('{{ requirement.id }}', 10);
+    let allRuns = [];
+    let ws = null;
+    let wsAttempts = 0;
+    let wsReconnectTimer = null;
+    let renderScheduled = false;
+    let lastPersistKey = `runs_overview_state_${reqId}`;
+    let localElapsedTimer = null;
+    let openLiveRunId = null;
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('searchInput').addEventListener('input', filterAndRender);
+      document.getElementById('sortSelect').addEventListener('change', filterAndRender);
+      document.getElementById('statusFilter').addEventListener('change', filterAndRender);
+      document.getElementById('startRunBtn').addEventListener('click', startRun);
+      // Bind state filter dropdown with badges
+      (function bindStateDropdown(){
+        const menu = document.getElementById('stateFilterMenu');
+        const label = document.getElementById('stateFilterLabel');
+        if (menu && label) {
+          menu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e){
+              e.preventDefault();
+              const value = this.getAttribute('data-value') || '';
+              document.getElementById('statusFilter').value = value;
+              const badge = this.querySelector('.badge').outerHTML;
+              label.innerHTML = badge;
+              filterAndRender();
+            });
+          });
+        }
+      })();
+      restoreState();
+      fetchAll();
+      openSocket();
+      startLocalElapsedTicker();
+
+      // Open live modal when clicking a processing/waiting list item
+      document.addEventListener('click', function(e){
+        const item = e.target.closest('.run-item');
+        if (!item) return;
+        const status = item.getAttribute('data-status');
+        if (status === 'processing' || status === 'waiting_for_display'){
+          const runId = parseInt(item.getAttribute('data-run-id'), 10);
+          if (Number.isFinite(runId)) {
+            e.preventDefault();
+            e.stopPropagation();
+            openLiveRun(runId);
+          }
+        }
+      });
+
+      // Reset state when live modal closes
+      const liveModalEl = document.getElementById('runLiveModal');
+      if (liveModalEl) {
+        liveModalEl.addEventListener('hidden.bs.modal', function(){
+          openLiveRunId = null;
+        });
+      }
+    });
+
+    // Ensure state is refreshed when navigating back via browser (BFCache)
+    window.addEventListener('pageshow', function(event){
+      // Always refetch; and reopen websocket to get any missed updates
+      fetchAll();
+      openSocket(true);
+    });
+
+    function fetchAll(){
+      fetch(`/requirements/${reqId}/api/runs/`)
+        .then(r=>r.json())
+        .then(data => {
+          // Merge existing client-side statuses into fetched runs based on id
+          const waitingMap = new Map(allRuns.filter(r => r.status === 'waiting_for_display').map(r => [r.id, r]));
+          allRuns = data.runs || [];
+          // Re-apply waiting status for runs that are known to be waiting
+          allRuns = allRuns.map(r => waitingMap.has(r.id) ? { ...r, status: 'waiting_for_display' } : r);
+          filterAndRender();
+        });
+    }
+
+    function statusBadge(s){
+      if (s === 'met') return '<span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>';
+      if (s === 'partially_met') return '<span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>';
+      if (s === 'unmet') return '<span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>';
+      if (s === 'error') return '<span class="badge bg-danger">Error</span>';
+      if (s === 'processing') return '<span class="badge bg-warning text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Processing</span></span>';
+      if (s === 'waiting_for_display') return '<span class="badge bg-secondary text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Waiting for display</span></span>';
+      return '<span class="badge badge-status-notmet">Unmet</span>';
+    }
+
+    function renderRun(r){
+      const indexLabel = r.index ? `#${r.index}` : '';
+      const steps = (typeof r.steps_taken === 'number' ? r.steps_taken : 0);
+      const elapsedVal = (r.status === 'processing' || r.status === 'waiting_for_display'
+        ? (typeof r.run_elapsed_s === 'number' ? r.run_elapsed_s : (typeof r.elapsed_s === 'number' ? r.elapsed_s : 0))
+        : (Number.isFinite(r.elapsed_s) ? r.elapsed_s : 0));
+      const showSpinner = (r.status === 'processing' || r.status === 'waiting_for_display');
+      const elapsedNumStr = (showSpinner
+        ? (elapsedVal.toFixed ? elapsedVal.toFixed(1) : String(elapsedVal))
+        : (Number.isFinite(r.elapsed_s) ? r.elapsed_s.toFixed(1) : String(r.elapsed_s || '0')));
+      const elapsedHtml = showSpinner
+        ? `<span class="spinner-border spinner-border-sm text-primary me-1" role="status" aria-hidden="true"></span><span class="elapsed-value" data-run-id="${r.id}">${elapsedNumStr}</span>`
+        : `<span class="elapsed-value" data-run-id="${r.id}">${elapsedNumStr}</span>`;
+      const reason = r.last_reasoning ? `<div class="small text-muted mt-1">${escapeHtml(r.last_reasoning)}</div>` : '';
+      // Show clickable styling for all, but only navigate for finished runs
+      const isClickable = true;
+      const canNavigate = (r.status && r.status !== 'processing' && r.status !== 'waiting_for_display');
+      // Token usage: prefer server-side formatted values, with client fallback
+      const tokensIn = (typeof r.tokens_in === 'number' ? r.tokens_in
+        : (r.usage && (typeof r.usage.in === 'number' ? r.usage.in
+          : (typeof r.usage.prompt_tokens === 'number' ? r.usage.prompt_tokens
+            : (typeof r.usage.input_tokens === 'number' ? r.usage.input_tokens : null)))));
+      const tokensOut = (typeof r.tokens_out === 'number' ? r.tokens_out
+        : (r.usage && (typeof r.usage.out === 'number' ? r.usage.out
+          : (typeof r.usage.completion_tokens === 'number' ? r.usage.completion_tokens
+            : (typeof r.usage.output_tokens === 'number' ? r.usage.output_tokens : null)))));
+      const tokensInFmt = (typeof r.tokens_in_fmt === 'string' ? r.tokens_in_fmt : (Number.isFinite(tokensIn) ? tokensIn.toLocaleString('en-US') : null));
+      const tokensOutFmt = (typeof r.tokens_out_fmt === 'string' ? r.tokens_out_fmt : (Number.isFinite(tokensOut) ? tokensOut.toLocaleString('en-US') : null));
+      let screenshotUrl = r.last_screenshot_url || '';
+      if ((!screenshotUrl || screenshotUrl === '') && r.status === 'error') {
+        screenshotUrl = '/media/static/runs/no_available_screen.png';
+      }
+      const thumb = screenshotUrl ? `<img class="run-thumb me-3" src="${screenshotUrl}" loading="lazy" data-lightbox-src="${screenshotUrl}">` : '';
+      return `
+        <div class="list-group-item run-item p-3 ${isClickable ? 'is-clickable' : ''}" data-status="${escapeHtml(r.status || 'unprocessed')}" data-run-id="${r.id}">
+          <div class="d-flex align-items-center justify-content-between flex-nowrap">
+            <div class="d-flex align-items-center gap-3 min-w-0">
+              <div class="num-circle flex-shrink-0 d-flex align-items-center justify-content-center" title="Index">${r.index || ''}</div>
+              ${thumb}
+              <div class="d-flex flex-column">
+              <div class="d-flex align-items-center gap-2">
+                ${statusBadge(r.status)}
+                <span class="text-muted small">Created ${r.created_at || ''}</span>
+              </div>
+              ${(r.status === 'processing' || r.status === 'waiting_for_display') && r.last_reasoning ? `<div class=\"small mt-1 text-truncate-1 min-w-0 me-2\" style=\"max-width: 520px;\" title=\"${escapeHtml(r.last_reasoning)}\">${escapeHtml(r.last_reasoning)}</div>` : (r.explanation ? `<div class=\"small mt-1 text-truncate-1 min-w-0 me-2\" style=\"max-width: 520px;\" title=\"${escapeHtml(r.explanation)}\">${escapeHtml(r.explanation)}</div>` : '')}
+              ${(tokensInFmt != null || tokensOutFmt != null) ? `<div class=\"small text-muted mt-1 d-inline-flex align-items-center\"><i class=\"bi bi-cpu me-1\"></i><span>#In-Tokens: <strong>${tokensInFmt ?? '-'}</strong> · #Out-Tokens: <strong>${tokensOutFmt ?? '-'}</strong></span></div>` : ''}
+              <div class="small mt-1 text-truncate-1 d-inline-flex align-items-center" title="${escapeHtml(r.start_url || '')}${r.current_url ? ` → ${escapeHtml(r.current_url)}` : ''}"><i class="bi bi-link-45deg me-1"></i><span>From ${isClickable ? `<span class=\"text-decoration-underline\">${escapeHtml(r.start_url || '')}</span>` : `<span class=\"text-decoration-underline\">${escapeHtml(r.start_url || '')}</span>`} ${r.current_url ? `→ ${isClickable ? `<span class=\\\"text-decoration-underline\\\">${escapeHtml(r.current_url)}</span>` : `<span class=\\\"text-decoration-underline\\\">${escapeHtml(r.current_url)}</span>`}` : ''}</span></div>
+              </div>
+            </div>
+            <div class="text-end small flex-shrink-0">
+              <div class="d-flex align-items-center"><i class="fa-solid fa-shoe-prints me-1 text-muted"></i><strong class="me-1">${steps}</strong><span>steps</span></div>
+              <div class="d-flex align-items-center"><i class="bi bi-stopwatch me-1 text-muted"></i><strong class="me-1">${elapsedHtml}</strong><span>s</span></div>
+            </div>
+          </div>
+          ${canNavigate ? `<a href="/runs/${r.id}/" class="stretched-link" aria-label="Open run"></a>` : ''}
+        </div>`;
+    }
+
+    function filterAndRender(){
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const sortBy = document.getElementById('sortSelect').value;
+      const status = document.getElementById('statusFilter').value;
+      let filtered = allRuns.slice();
+      if (search) filtered = filtered.filter(r => (r.start_url||'').toLowerCase().includes(search)
+        || (r.current_url||'').toLowerCase().includes(search)
+        || (r.status||'').toLowerCase().includes(search)
+        || (r.explanation||'').toLowerCase().includes(search)
+        || (r.last_reasoning||'').toLowerCase().includes(search));
+      if (status) filtered = filtered.filter(r => r.status === status);
+      filtered.sort((a,b)=>{
+        if (sortBy === 'created_at') return new Date(a.created_at) - new Date(b.created_at);
+        if (sortBy === 'elapsed') return (a.elapsed_s||0) - (b.elapsed_s||0);
+        if (sortBy === 'elapsed_desc') return (b.elapsed_s||0) - (a.elapsed_s||0);
+        if (sortBy === 'steps') return (a.steps_taken||0) - (b.steps_taken||0);
+        if (sortBy === 'steps_desc') return (b.steps_taken||0) - (a.steps_taken||0);
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+      const list = document.getElementById('runsList');
+      list.innerHTML = filtered.map(function(r,i){ return renderRun(Object.assign({}, r, {index: i+1})); }).join('');
+      document.getElementById('emptyState').classList.toggle('d-none', filtered.length !== 0);
+      updateKpiHeader(allRuns);
+      persistState();
+      // Keep live modal in sync if open
+      if (openLiveRunId != null) {
+        const run = allRuns.find(r => r.id === openLiveRunId);
+        if (run) updateLiveModalFromRun(run);
+      }
+    }
+
+    function startRun(){
+      fetch(`/requirements/${reqId}/api/runs/start/`, { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() }})
+        .then(()=> fetchAll());
+    }
+
+    function openSocket(forceReconnect){
+      try { if (forceReconnect && ws) { try { ws.close(); } catch(e){} } } catch(e){}
+      const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+      ws = new WebSocket(`${proto}://${location.host}/ws/runs/${reqId}/`);
+      ws.onopen = () => { wsAttempts = 0; if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; } };
+      ws.onclose = () => {
+        // Exponential backoff up to 10s
+        wsAttempts = Math.min(wsAttempts + 1, 8);
+        const delay = Math.min(10000, 300 * Math.pow(2, wsAttempts));
+        wsReconnectTimer = setTimeout(() => openSocket(), delay);
+      };
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          console.log('WS message:', msg);
+          if (msg.phase === 'waiting_for_display') {
+            const runId = msg.run_id;
+            const idx = allRuns.findIndex(r => r.id === runId);
+            if (idx !== -1) {
+              allRuns[idx] = { ...allRuns[idx], status: 'waiting_for_display' };
+            } else {
+              allRuns.unshift({ id: runId, status: 'waiting_for_display', created_at: new Date().toISOString(), steps_taken: 0, elapsed_s: 0, start_url: '{{ requirement.setup.start_url|default:"" }}' });
+            }
+            requestRender();
+          if (openLiveRunId === runId) {
+            const run = allRuns.find(r => r.id === runId);
+            if (run) updateLiveModalFromRun(run);
+          }
+          } else if (msg.phase === 'started') {
+            const runId = msg.run_id;
+            const idx = allRuns.findIndex(r => r.id === runId);
+            if (idx !== -1) {
+              allRuns[idx] = { ...allRuns[idx], status: 'processing' };
+            } else {
+              allRuns.unshift({ id: runId, status: 'processing', created_at: new Date().toISOString(), steps_taken: 0, elapsed_s: 0, start_url: '{{ requirement.setup.start_url|default:"" }}' });
+            }
+            requestRender();
+          if (openLiveRunId === runId) {
+            const run = allRuns.find(r => r.id === runId);
+            if (run) updateLiveModalFromRun(run);
+          }
+            // Update requirement status badge at the top
+            if (msg.requirement_status) {
+              const badgeContainer = document.getElementById('requirementStatusBadge');
+              if (badgeContainer) {
+                let badgeHtml = '';
+                if (msg.requirement_status === 'met') badgeHtml = '<span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>';
+                else if (msg.requirement_status === 'partially_met') badgeHtml = '<span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>';
+                else if (msg.requirement_status === 'unmet') badgeHtml = '<span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>';
+                else if (msg.requirement_status === 'processing') badgeHtml = '<span class="badge bg-warning text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Processing</span></span>';
+                else if (msg.requirement_status === 'error') badgeHtml = '<span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-exclamation-octagon-fill me-1"></i><span>Error</span></span>';
+                else badgeHtml = '<span class="badge bg-secondary">Unprocessed</span>';
+                badgeContainer.innerHTML = badgeHtml;
+              }
+            }
+          } else if (msg.phase === 'progress') {
+            const idx = allRuns.findIndex(r => r.id === msg.run_id);
+            if (idx !== -1) {
+              allRuns[idx] = { ...allRuns[idx], status: 'processing', steps_taken: (msg.step_counter ?? allRuns[idx].steps_taken), last_reasoning: (msg.reasoning_summary ?? allRuns[idx].last_reasoning), elapsed_s: (msg.run_elapsed_s ?? msg.turn_elapsed_s ?? allRuns[idx].elapsed_s), run_elapsed_s: (msg.run_elapsed_s ?? allRuns[idx].run_elapsed_s), last_screenshot_url: (msg.screenshot_url ?? allRuns[idx].last_screenshot_url) };
+              requestRender();
+              if (openLiveRunId === msg.run_id) {
+                updateLiveModalFromRun(allRuns[idx]);
+              }
+            }
+          } else if (msg.phase === 'finished') {
+            const idx = allRuns.findIndex(r => r.id === msg.run_id);
+            if (idx !== -1) {
+              allRuns[idx] = { ...allRuns[idx], status: msg.status || 'unmet', steps_taken: msg.steps_taken || 0, elapsed_s: msg.elapsed_s || 0, last_screenshot_url: (msg.last_screenshot_url ?? allRuns[idx].last_screenshot_url) };
+              // If live modal is open for this run, keep updating in place; otherwise reload
+              if (openLiveRunId === msg.run_id) {
+                updateLiveModalFromRun(allRuns[idx]);
+                requestRender();
+              } else {
+                // Force a full reload to ensure final content (explanation, tokens, links) is rendered consistently
+                try { window.location.reload(); } catch(e) { requestRender(); }
+              }
+            } else {
+              fetchAll();
+            }
+            // Update requirement status badge at the top
+            if (msg.requirement_status) {
+              const badgeContainer = document.getElementById('requirementStatusBadge');
+              if (badgeContainer) {
+                let badgeHtml = '';
+                if (msg.requirement_status === 'met') badgeHtml = '<span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>';
+                else if (msg.requirement_status === 'partially_met') badgeHtml = '<span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>';
+                else if (msg.requirement_status === 'unmet') badgeHtml = '<span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>';
+                else if (msg.requirement_status === 'processing') badgeHtml = '<span class="badge bg-warning text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Processing</span></span>';
+                else if (msg.requirement_status === 'error') badgeHtml = '<span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-exclamation-octagon-fill me-1"></i><span>Error</span></span>';
+                else badgeHtml = '<span class="badge bg-secondary">Unprocessed</span>';
+                badgeContainer.innerHTML = badgeHtml;
+              }
+            }
+          }
+        } catch(e) {}
+      };
+    }
+
+    function requestRender(){
+      if (renderScheduled) return;
+      renderScheduled = true;
+      setTimeout(() => { renderScheduled = false; filterAndRender(); }, 120);
+    }
+
+    function openLiveRun(runId){
+      try {
+        openLiveRunId = runId;
+        const run = allRuns.find(r => r.id === runId);
+        updateLiveModalFromRun(run || { id: runId, status: 'processing' });
+        const modalEl = document.getElementById('runLiveModal');
+        if (!modalEl) return;
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
+      } catch(e) {}
+    }
+
+    function updateLiveModalFromRun(run){
+      try {
+        const imgEl = document.getElementById('liveRunImg');
+        const reasonEl = document.getElementById('liveRunReason');
+        const statusEl = document.getElementById('liveRunStatus');
+        const stepsEl = document.getElementById('liveRunSteps');
+        const elapsedEl = document.getElementById('liveRunElapsed');
+        if (!imgEl || !reasonEl || !statusEl || !stepsEl || !elapsedEl) return;
+        let screenshotUrl = run && run.last_screenshot_url ? run.last_screenshot_url : '';
+        if ((!screenshotUrl || screenshotUrl === '') && run && run.status === 'error') {
+          screenshotUrl = '/media/static/runs/no_available_screen.png';
+        }
+        // Smoothly update image with crossfade to avoid instant swap/cached flicker
+        const nextSrc = (screenshotUrl || '');
+        const currSrc = (imgEl.getAttribute('src') || '');
+        if (currSrc !== nextSrc){
+          const wrap = document.getElementById('liveRunImgWrap');
+          if (wrap) {
+            // Create a ghost image on top with the new src
+            const ghost = document.createElement('img');
+            ghost.className = 'ghost-img';
+            ghost.alt = 'Live run screenshot (transition)';
+            ghost.src = nextSrc;
+            wrap.appendChild(ghost);
+            // Force style calc to ensure transition applies
+            try { void ghost.offsetHeight; } catch(e){}
+            // Fade old base image out and new ghost in simultaneously (true crossfade)
+            imgEl.classList.add('is-fading');
+            ghost.classList.add('is-visible');
+            const finalizeSwap = () => {
+              try { imgEl.src = nextSrc; } catch(e){}
+              // Fade base image back in, keep ghost a moment, then remove ghost
+              setTimeout(() => {
+                imgEl.classList.remove('is-fading');
+                setTimeout(() => { ghost.classList.remove('is-visible'); }, 120);
+                setTimeout(() => { try { wrap.removeChild(ghost); } catch(e){} }, 900);
+              }, 120);
+            };
+            // On load, finalize; else fallback after short delay
+            let loaded = false;
+            try {
+              ghost.onload = function(){ loaded = true; ghost.onload = null; finalizeSwap(); };
+            } catch(e){}
+            setTimeout(() => { if (!loaded) finalizeSwap(); }, 350);
+          } else {
+            // Fallback to simple fade if wrapper missing
+            imgEl.classList.add('is-fading');
+            setTimeout(() => { imgEl.src = nextSrc; imgEl.classList.remove('is-fading'); }, 200);
+          }
+        }
+        // Smoothly update reasoning text if changed
+        const nextReason = (run && run.last_reasoning) ? run.last_reasoning : '';
+        if (reasonEl.textContent !== nextReason){
+          reasonEl.classList.add('is-fading');
+          setTimeout(()=>{
+            reasonEl.textContent = nextReason;
+            // Two-phase fade for text: keep faded briefly to ease in
+            setTimeout(()=>{ reasonEl.classList.remove('is-fading'); }, 250);
+          }, 180);
+        }
+        statusEl.innerHTML = statusBadge(run && run.status ? run.status : 'processing');
+        stepsEl.textContent = String(run && Number.isFinite(run.steps_taken) ? run.steps_taken : 0);
+        const elapsedVal = (run && (run.status === 'processing' || run.status === 'waiting_for_display'))
+          ? (typeof run.run_elapsed_s === 'number' ? run.run_elapsed_s : (typeof run.elapsed_s === 'number' ? run.elapsed_s : 0))
+          : (run && Number.isFinite(run.elapsed_s) ? run.elapsed_s : 0);
+        elapsedEl.textContent = (elapsedVal && elapsedVal.toFixed) ? elapsedVal.toFixed(1) : String(elapsedVal || 0);
+      } catch(e) {}
+    }
+
+    function escapeHtml(str){
+      return (str||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    function getCsrfToken(){
+      const name = 'csrftoken=';
+      const parts = document.cookie.split(';');
+      for (let i=0; i<parts.length; i++){
+        const c = parts[i].trim();
+        if (c.startsWith(name)) return decodeURIComponent(c.substring(name.length));
+      }
+      const el = document.querySelector('input[name=csrfmiddlewaretoken]');
+      return el ? el.value : '';
+    }
+
+    function persistState(){
+      try {
+        const state = {
+          q: document.getElementById('searchInput').value || '',
+          sort: document.getElementById('sortSelect').value || 'created_at_desc',
+          status: document.getElementById('statusFilter').value || ''
+        };
+        localStorage.setItem(lastPersistKey, JSON.stringify(state));
+      } catch(e){}
+    }
+
+    function restoreState(){
+      try {
+        const raw = localStorage.getItem(lastPersistKey);
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s.q != null) document.getElementById('searchInput').value = s.q;
+        if (s.sort) document.getElementById('sortSelect').value = s.sort;
+        if (s.status != null) document.getElementById('statusFilter').value = s.status;
+      } catch(e){}
+    }
+
+    function startLocalElapsedTicker(){
+      try { if (localElapsedTimer) clearInterval(localElapsedTimer); } catch(e){}
+      localElapsedTimer = setInterval(() => {
+        let changed = false;
+        allRuns = allRuns.map(r => {
+          if (r && (r.status === 'processing' || r.status === 'waiting_for_display')){
+            // Prefer cumulative run elapsed when present
+            const curr = (typeof r.run_elapsed_s === 'number') ? r.run_elapsed_s : (typeof r.elapsed_s === 'number' ? r.elapsed_s : 0);
+            const next = curr + 1;
+            changed = true;
+            return { ...r, run_elapsed_s: next, elapsed_s: next };
+          }
+          return r;
+        });
+        if (changed) updateElapsedOnly();
+      }, 1000);
+    }
+
+    function updateElapsedOnly(){
+      try {
+        const nodes = document.querySelectorAll('.elapsed-value[data-run-id]');
+        nodes.forEach(function(el){
+          const runId = parseInt(el.getAttribute('data-run-id'), 10);
+          if (!Number.isFinite(runId)) return;
+          const run = allRuns.find(r => r.id === runId);
+          if (!run) return;
+          const showSpinner = (run.status === 'processing' || run.status === 'waiting_for_display');
+          const val = showSpinner
+            ? (typeof run.run_elapsed_s === 'number' ? run.run_elapsed_s : (typeof run.elapsed_s === 'number' ? run.elapsed_s : 0))
+            : (Number.isFinite(run.elapsed_s) ? run.elapsed_s : 0);
+          const nextStr = (val && val.toFixed) ? val.toFixed(1) : String(val || 0);
+          if (el.textContent !== nextStr) el.textContent = nextStr;
+        });
+      } catch(e){}
+    }
+
+    function updateKpiHeader(runs){
+      const total = runs.length || 0;
+      let met=0, partial=0, processing=0, waiting=0, unmet=0, error=0;
+      runs.forEach(r => {
+        if (r.status === 'met') met++;
+        else if (r.status === 'partially_met') partial++;
+        else if (r.status === 'processing') processing++;
+        else if (r.status === 'waiting_for_display') waiting++;
+        else if (r.status === 'unmet') unmet++;
+        else if (r.status === 'error') error++;
+      });
+      const metEl = document.getElementById('kpiMet');
+      const partialEl = document.getElementById('kpiPartial');
+      const processingEl = document.getElementById('kpiProcessing');
+      const waitingEl = document.getElementById('kpiWaiting');
+      const unmetEl = document.getElementById('kpiUnmet');
+      const errorEl = document.getElementById('kpiError');
+      if (metEl) metEl.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Met: ${met}`;
+      if (partialEl) { partialEl.innerHTML = `<i class=\"bi bi-slash-circle-fill me-1\"></i>Partially met: ${partial}`; partialEl.classList.toggle('d-none', partial === 0); }
+      if (processingEl) { processingEl.textContent = `Processing: ${processing}`; processingEl.classList.toggle('d-none', processing === 0); }
+      if (waitingEl) { waitingEl.textContent = `Waiting: ${waiting}`; waitingEl.classList.toggle('d-none', waiting === 0); }
+      if (unmetEl) unmetEl.innerHTML = `<i class=\"bi bi-x-circle-fill me-1\"></i>Unmet: ${unmet}`;
+      if (errorEl) { errorEl.textContent = `Error: ${error}`; errorEl.classList.toggle('d-none', error === 0); }
+      const denom = Math.max(1, total);
+      const metPct = Math.round((met/denom)*100);
+      const partialPct = Math.min(100 - metPct, Math.round((partial/denom)*100));
+      const unmetPct = Math.min(100 - metPct - partialPct, Math.round((unmet/denom)*100));
+      const errPct = Math.min(100 - metPct - partialPct - unmetPct, Math.round((error/denom)*100));
+      const waitingPct = Math.min(100 - metPct - partialPct - unmetPct - errPct, Math.round((waiting/denom)*100));
+      const procPct = Math.min(100 - metPct - partialPct - unmetPct - errPct - waitingPct, Math.round((processing/denom)*100));
+      const metBar = document.getElementById('kpiMetBar');
+      const partialBar = document.getElementById('kpiPartialBar');
+      const unmetBar = document.getElementById('kpiUnmetBar');
+      const errorBar = document.getElementById('kpiErrorBar');
+      const waitingBar = document.getElementById('kpiWaitingBar');
+      const procBar = document.getElementById('kpiProcessingBar');
+      if (metBar) metBar.style.width = `${metPct}%`;
+      if (partialBar) { partialBar.style.width = `${partialPct}%`; partialBar.classList.toggle('d-none', partialPct === 0); }
+      if (unmetBar) unmetBar.style.width = `${unmetPct}%`;
+      if (errorBar) { errorBar.style.width = `${errPct}%`; errorBar.classList.toggle('d-none', errPct === 0); }
+      if (waitingBar) { waitingBar.style.width = `${waitingPct}%`; waitingBar.classList.toggle('d-none', waitingPct === 0); }
+      if (procBar) { procBar.style.width = `${procPct}%`; procBar.classList.toggle('d-none', procPct === 0); }
+    }
+  })();
+</script>
+<!-- Simple lightbox for run screenshots -->
+<div class="modal fade" id="runScreenshotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <img id="runScreenshotImg" src="" alt="Run screenshot enlarged" style="width:100%;height:auto;display:block;">
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  (function(){
+    document.addEventListener('click', function(e){
+      const img = e.target.closest('img.run-thumb[data-lightbox-src]');
+      if (!img) return;
+      // Skip lightbox for in-progress items to allow live modal instead
+      try {
+        const item = img.closest('.run-item');
+        if (item) {
+          const status = item.getAttribute('data-status');
+          if (status === 'processing' || status === 'waiting_for_display') {
+            return;
+          }
+        }
+      } catch(e){}
+      try {
+        const modalEl = document.getElementById('runScreenshotModal');
+        const modalImg = document.getElementById('runScreenshotImg');
+        if (!modalEl || !modalImg) return;
+        modalImg.src = img.getAttribute('data-lightbox-src');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      } catch(e) {}
+    });
+  })();
+</script>
+{% endblock %}
+
+

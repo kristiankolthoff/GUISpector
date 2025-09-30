@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% block title %}Add Setup{% endblock %}
+{% block content %}
+<div class="container py-5" style="min-height: 80vh; background: linear-gradient(120deg, #f8fafc 60%, #e9ecef 100%);">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card shadow rounded-4 border-0">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <span class="display-5 text-primary"><i class="bi bi-patch-check-fill"></i></span>
+            <h2 class="fw-bold mt-2 mb-1">Add Setup</h2>
+            <p class="text-muted mb-0">Define a setup with a start URL and requirements</p>
+          </div>
+          <form method="post" action="{% url 'setups:add' %}" autocomplete="off">
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_name">Name</label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_start_url">Start URL
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="This is the entrypoint for the agent to test the requirements"></i>
+              </label>
+              {{ form.start_url }}
+              {% if form.start_url.errors %}
+                <div class="text-danger small mt-1">{{ form.start_url.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Requirements (moved directly after Start URL) -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_requirements_input">Requirements
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="Provide requirements in any format (structured or unstructured)"></i>
+                <button type="button" class="btn btn-outline-secondary btn-sm ms-2" id="openRequirementsModal"><i class="bi bi-arrows-fullscreen"></i> Large editor</button>
+              </label>
+              {{ form.requirements_input }}
+              {% if form.requirements_input.errors %}
+                <div class="text-danger small mt-1">{{ form.requirements_input.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- User-provided Inputs (key/value pairs) -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">User-provided Inputs
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="Specify key/value pairs the agent should use when fields match these names (e.g., 'phone', 'email')."></i>
+              </label>
+              <div id="inputs-list"></div>
+              <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-input-btn"><i class="bi bi-plus"></i> Add Input</button>
+              <input type="hidden" name="inputs_json" id="inputs_json">
+            </div>
+
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                let inputPairs = [];
+                function renderInputs() {
+                  const list = document.getElementById('inputs-list');
+                  if (!list) return;
+                  list.innerHTML = '';
+                  inputPairs.forEach((pair, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'input-group mb-2';
+                    row.innerHTML = `
+                      <input type="text" class="form-control" placeholder="Key (e.g., phone number)" value="${pair.key || ''}" onchange="updateInputPair(${idx}, 'key', this.value)">
+                      <input type="text" class="form-control" placeholder="Value (e.g., 555-123-4567)" value="${pair.value || ''}" onchange="updateInputPair(${idx}, 'value', this.value)">
+                      <button type="button" class="btn btn-outline-danger" onclick="removeInputPair(${idx})"><i class="bi bi-trash"></i></button>
+                    `;
+                    list.appendChild(row);
+                  });
+                  const hidden = document.getElementById('inputs_json');
+                  if (hidden) hidden.value = JSON.stringify(inputPairs);
+                }
+                window.addInputPair = function() {
+                  inputPairs.push({ key: '', value: '' });
+                  renderInputs();
+                }
+                window.removeInputPair = function(idx) {
+                  inputPairs.splice(idx, 1);
+                  renderInputs();
+                }
+                window.updateInputPair = function(idx, field, value) {
+                  inputPairs[idx][field] = value;
+                  const hidden = document.getElementById('inputs_json');
+                  if (hidden) hidden.value = JSON.stringify(inputPairs);
+                }
+                const addBtn = document.getElementById('add-input-btn');
+                if (addBtn) addBtn.onclick = window.addInputPair;
+                renderInputs();
+              });
+            </script>
+
+            <!-- MLLM Agent Selection -->
+            <div class="mb-4">
+              <label for="agent_model" class="form-label fw-semibold">MLLM Agent
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="This model will be used to interact with the prototype as an agent."></i>
+              </label>
+              <div class="dropdown w-100">
+                <button class="btn bg-white border form-control text-start d-flex justify-content-between align-items-center" type="button" id="agentDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span id="agentDropdownLabel">Select agent</span>
+                  <i class="bi bi-caret-down ms-2"></i>
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="agentDropdownBtn" id="agentDropdownMenu">
+                  {% for value, display in agent_options %}
+                    <li><button type="button" class="dropdown-item" data-value="{{ value }}">{{ display }}</button></li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <select class="d-none" id="agent_model" name="agent_model" required>
+                {% for value, display in agent_options %}
+                  <option value="{{ value }}" {% if value == default_agent %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- LLM Model Selection -->
+            <div class="mb-4">
+              <label for="llm_model" class="form-label fw-semibold">LLM
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="This model will be used to extract requirements and create summaries for failed requirements"></i>
+              </label>
+              <div class="dropdown w-100">
+                <button class="btn bg-white border form-control text-start d-flex justify-content-between align-items-center" type="button" id="llmDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span id="llmDropdownLabel">Select model</span>
+                  <i class="bi bi-caret-down ms-2"></i>
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="llmDropdownBtn" id="llmDropdownMenu">
+                  {% for value, display in llm_options %}
+                    <li><button type="button" class="dropdown-item" data-value="{{ value }}">{{ display }}</button></li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <select class="d-none" id="llm_model" name="llm_model" required>
+                {% for value, display in llm_options %}
+                  <option value="{{ value }}" {% if value == default_llm %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Agent Timeout (seconds) -->
+            <div class="mb-4">
+              <label for="id_agent_timeout_seconds" class="form-label fw-semibold">Agent Timeout (seconds)
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="If the agent does not respond within this time, the test aborts with an error. Standard is 120 seconds."></i>
+              </label>
+              {{ form.agent_timeout_seconds }}
+            </div>
+
+            <!-- Max Retries -->
+            <div class="mb-4">
+              <label for="id_max_retries" class="form-label fw-semibold">Maximum Retries
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="Times to retry after an error occurs during testing a requirement."></i>
+              </label>
+              {{ form.max_retries }}
+            </div>
+
+            <!-- Maximum Reasoning Steps -->
+            <div class="mb-4">
+              <label for="id_max_reasoning_steps" class="form-label fw-semibold">Maximum Reasoning Steps
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="Restricts the MLLM agent. After this number of steps, the test will be aborted."></i>
+              </label>
+              {{ form.max_reasoning_steps }}
+            </div>
+
+            <!-- Tags (placed second last, above allow_guess) -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_tags_input">Tags
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="Provide a comma-separated list of tags. If left empty, tags will be extracted automatically."></i>
+              </label>
+              {{ form.tags_input }}
+            </div>
+            
+            
+            <div class="mb-4 form-check">
+              {{ form.allow_guess }}
+              <label class="form-check-label" for="id_allow_guess">{{ form.allow_guess.label }}</label>
+            </div>
+            
+            <div class="row mt-4 g-2">
+              <div class="col-12 col-sm-6">
+                <a href="/" class="btn btn-outline-secondary w-100 rounded-3">Cancel</a>
+              </div>
+              <div class="col-12 col-sm-6">
+                <button id="createBtn" type="submit" class="btn btn-success w-100 rounded-3"><i class="bi bi-check-circle me-2"></i>Create</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Bootstrap Icons CDN (if not already included) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+  /* Allow vertical resizing for requirements textarea within container */
+  #id_requirements_input {
+    resize: vertical !important;
+    max-width: 100%;
+  }
+  /* Use normal arrow cursor for info icons */
+  .bi-info-circle { cursor: default; }
+  </style>
+
+<!-- Full-screen processing overlay -->
+<div id="processingOverlay" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.85); backdrop-filter:saturate(180%) blur(3px); z-index: 2000;">
+  <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
+    <div class="mb-3" style="font-size:2.5rem;color:#0d6efd;">
+      <i class="bi bi-patch-check-fill"></i>
+    </div>
+    <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true" style="width:3rem;height:3rem;"></div>
+    <div class="fw-semibold" style="font-size:1.1rem; color:#0d6efd;">Creating setup…</div>
+    <div class="text-muted mt-1">This may take a moment while we process your requirements.</div>
+  </div>
+  <!-- capture all pointer events -->
+</div>
+
+<!-- Large Requirements Editor Modal -->
+<div class="modal fade" id="requirementsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Requirements</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="requirementsModalTextarea" class="form-control" rows="18" wrap="soft" style="white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere; font-family:monospace; resize: vertical; height: 60vh; overflow-x:hidden;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveRequirementsModal">Save</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<script>
+  (function(){
+    // Enable Bootstrap tooltips on this page (exact pattern as provided)
+    document.addEventListener('DOMContentLoaded', function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+
+      // Large editor modal wiring
+      var area = document.getElementById('id_requirements_input');
+      var openBtn = document.getElementById('openRequirementsModal');
+      var modalEl = document.getElementById('requirementsModal');
+      var modalTextarea = document.getElementById('requirementsModalTextarea');
+      var saveBtn = document.getElementById('saveRequirementsModal');
+      var modalInstance = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+      // Sync placeholder from the main textarea so empty modal shows guidance and disappears on typing
+      if (area && modalTextarea) {
+        var ph = area.getAttribute('placeholder') || '';
+        modalTextarea.setAttribute('placeholder', ph);
+      }
+
+      function openEditor() {
+        if (!area || !modalTextarea || !modalInstance) return;
+        var current = (area.value || "");
+        modalTextarea.value = current.trim().length ? current : "";
+        modalInstance.show();
+        setTimeout(function(){ modalTextarea.focus(); }, 150);
+      }
+      if (openBtn) openBtn.addEventListener('click', openEditor);
+      if (area) area.addEventListener('dblclick', openEditor);
+      if (saveBtn) saveBtn.addEventListener('click', function(){
+        if (!area || !modalTextarea || !modalInstance) return;
+        area.value = modalTextarea.value;
+        modalInstance.hide();
+      });
+
+      // Custom dropdowns for agent and llm
+      function initDropdown(hiddenSelectId, btnId, labelSpanId, menuId) {
+        var selectEl = document.getElementById(hiddenSelectId);
+        var btnEl = document.getElementById(btnId);
+        var labelEl = document.getElementById(labelSpanId);
+        var menuEl = document.getElementById(menuId);
+        if (!selectEl || !btnEl || !labelEl || !menuEl) return;
+        try {
+          var selected = selectEl.options[selectEl.selectedIndex];
+          labelEl.textContent = selected ? selected.text : labelEl.textContent;
+        } catch (e) {}
+        menuEl.querySelectorAll('.dropdown-item').forEach(function(item){
+          item.addEventListener('click', function(){
+            var val = item.getAttribute('data-value');
+            // Update hidden select
+            Array.from(selectEl.options).forEach(function(opt){ opt.selected = (opt.value === val); });
+            // Update label
+            labelEl.textContent = item.textContent;
+          });
+        });
+      }
+
+      initDropdown('agent_model', 'agentDropdownBtn', 'agentDropdownLabel', 'agentDropdownMenu');
+      initDropdown('llm_model', 'llmDropdownBtn', 'llmDropdownLabel', 'llmDropdownMenu');
+
+      // Client-side enforcement for numeric inputs (min and step)
+      function bindStepEnforcement(inputId, minVal, stepVal, fallbackVal) {
+        var el = document.getElementById(inputId);
+        if (!el) return;
+        function clamp(val) {
+          var n = parseInt(val, 10);
+          if (isNaN(n)) return NaN;
+          if (n < minVal) n = minVal;
+          return n;
+        }
+        el.addEventListener('input', function(){
+          var n = clamp(el.value);
+          if (!isNaN(n)) el.value = n;
+        });
+        el.addEventListener('blur', function(){
+          var n = clamp(el.value);
+          if (isNaN(n)) {
+            if (typeof fallbackVal === 'number') el.value = fallbackVal;
+            return;
+          }
+          if (stepVal && stepVal > 0) {
+            var adjusted = minVal + Math.round((n - minVal) / stepVal) * stepVal;
+            if (adjusted < minVal) adjusted = minVal;
+            el.value = adjusted;
+          } else {
+            el.value = n;
+          }
+        });
+        // Initialize value on load if empty/invalid
+        var startVal = clamp(el.value);
+        if (isNaN(startVal) && typeof fallbackVal === 'number') {
+          el.value = fallbackVal;
+        }
+      }
+
+      bindStepEnforcement('id_max_reasoning_steps', 10, 10, 60);
+      bindStepEnforcement('id_agent_timeout_seconds', 30, 10, 120);
+      bindStepEnforcement('id_max_retries', 1, 1, 2);
+    });
+    const form = document.querySelector('form[method="post"]');
+    const overlay = document.getElementById('processingOverlay');
+    const createBtn = document.getElementById('createBtn');
+    if (!form || !overlay) return;
+    function showOverlay(){
+      // Disable interactions
+      overlay.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      if (createBtn) {
+        createBtn.disabled = true;
+      }
+      // Make links and buttons inert to avoid duplicate submits (keep inputs enabled for POST serialization incl. CSRF)
+      document.querySelectorAll('a, button').forEach(el => {
+        if (el !== createBtn) {
+          el.setAttribute('data-prev-pointer', el.style.pointerEvents || '');
+          el.style.pointerEvents = 'none';
+          el.classList.add('disabled');
+          el.setAttribute('aria-disabled', 'true');
+        }
+      });
+      document.body.setAttribute('aria-busy', 'true');
+    }
+    function hideOverlay(){
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+      document.querySelectorAll('[data-prev-pointer]').forEach(el => {
+        const prev = el.getAttribute('data-prev-pointer');
+        el.style.pointerEvents = prev;
+        el.removeAttribute('data-prev-pointer');
+        el.classList.remove('disabled');
+        el.removeAttribute('aria-disabled');
+      });
+      document.body.removeAttribute('aria-busy');
+    }
+    form.addEventListener('submit', function(){
+      // If client-side validation is desired, checkValidity could be used here
+      showOverlay();
+    });
+    window.addEventListener('pageshow', function(e){
+      // In case of back-forward cache or validation error reloads
+      hideOverlay();
+    });
+  })();
+  </script>
+{% endblock %}
+
+

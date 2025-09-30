@@ -1,0 +1,945 @@
+{% extends 'base.html' %}
+{% block title %}Setup Detail{% endblock %}
+{% block content %}
+<div class="container-fluid px-3">
+  <!-- Summary Header -->
+  <div class="card shadow-sm border-0 rounded-4 mb-3 overflow-hidden">
+    {% if setup.screenshot %}
+    <div class="screenshot-frame">
+      <div class="ratio ratio-21x9" style="max-height: 320px;">
+        <img src="{{ setup.screenshot.url }}" alt="Screenshot" class="screenshot-img" id="screenshotThumb" style="cursor: zoom-in;" title="Click to enlarge">
+      </div>
+    </div>
+    {% endif %}
+    <div class="row g-0 header-frame">
+      <div class="col-lg-8 p-3 p-md-4">
+      <div class="d-flex align-items-center gap-3 mb-1 flex-wrap">
+        <span class="display-6 fw-bold mb-0">{{ setup.name }}</span>
+      </div>
+      <div class="text-muted small mb-2" id="totalBadgeText">{{ setup.requirements.count }} requirements</div>
+      <div class="d-flex align-items-center gap-2" style="max-width: 100%;">
+        <a class="link-underline-opacity-0 text-decoration-none" href="{{ setup.start_url }}" target="_blank" rel="noopener" id="startUrlLink" title="Open application">
+          <span id="startUrlText">Open Application</span>
+        </a>
+      </div>
+        {% if setup.description %}
+      <div class="mt-3 text-muted" id="setupDescription" style="white-space: pre-line;">{{ setup.description }}</div>
+        {% endif %}
+      <div class="d-flex align-items-center gap-2 mt-3 flex-wrap" id="kpiRow" aria-live="polite">
+        <span role="button" tabindex="0" class="badge bg-success-subtle text-success border border-success kpi-chip d-inline-flex align-items-center" data-status="met" id="metCountBadge"><i class="bi bi-check-circle-fill me-1"></i>Met: {{ setup.num_met }}</span>
+        <span role="button" tabindex="0" class="badge badge-status-partial-soft kpi-chip d-inline-flex align-items-center" data-status="partially_met" id="partialCountBadge"><i class="bi bi-slash-circle-fill me-1"></i>Partially met: 0</span>
+        <span role="button" tabindex="0" class="badge bg-danger-subtle text-danger border border-danger kpi-chip d-inline-flex align-items-center" data-status="unmet" id="unmetCountBadge"><i class="bi bi-x-circle-fill me-1"></i>Unmet: {{ setup.num_unmet }}</span>
+        <span role="button" tabindex="0" class="badge bg-warning-subtle text-dark border border-warning kpi-chip {% if not setup.num_processing %}d-none{% endif %}" data-status="processing" id="processingCountBadge">Processing: {{ setup.num_processing }}</span>
+        <span role="button" tabindex="0" class="badge bg-danger text-light border border-danger kpi-chip {% if not setup.num_error %}d-none{% endif %}" data-status="error" id="errorCountBadge">Error: {{ setup.num_error }}</span>
+        <span role="button" tabindex="0" class="badge bg-secondary-subtle text-dark border border-secondary kpi-chip {% if not setup.num_unprocessed %}d-none{% endif %}" data-status="unprocessed" id="unprocessedCountBadge">Unprocessed: {{ setup.num_unprocessed }}</span>
+      </div>
+      <div class="progress mt-2" style="height: 12px; background: #eef1f6;" aria-label="Requirement status distribution">
+          <div id="metBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+        <div id="partialBar" class="progress-bar bg-partial" role="progressbar" style="width: 0%"></div>
+          <div id="unmetBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+          <div id="unprocessedBar" class="progress-bar bg-secondary {% if not setup.num_unprocessed %}d-none{% endif %}" role="progressbar" style="width: 0%"></div>
+        <div id="errorBar" class="progress-bar bg-danger {% if not setup.num_error %}d-none{% endif %}" role="progressbar" style="width: 0%"></div>
+          <div id="processingBar" class="progress-bar bg-warning {% if not setup.num_processing %}d-none{% endif %}" role="progressbar" style="width: 0%"></div>
+        </div>
+      </div>
+    <div class="col-lg-4 p-3 p-md-4 d-flex align-items-center justify-content-end">
+      <div class="action-panel action-group d-flex flex-column gap-2 w-100 p-3 action-panel-sticky justify-content-center">
+        <button class="btn btn-primary soft-shadow w-100" id="startRunBtn"><i class="bi bi-play-fill me-1"></i><span>Start run</span></button>
+        <button class="btn btn-outline-secondary soft-shadow w-100" id="addReqBtn"><i class="bi bi-plus-circle me-1"></i><span>Add requirements</span></button>
+        <button class="btn btn-outline-danger soft-shadow w-100" id="deleteAllBtn"><i class="bi bi-trash me-1"></i><span>Delete requirements</span></button>
+        <button class="btn btn-outline-secondary soft-shadow w-100" id="summaryBtn"><i class="bi bi-journal-text me-1"></i><span>Summary</span></button>
+        <a class="btn btn-outline-secondary soft-shadow w-100" href="{% url 'setups:edit' setup.id %}" id="settingsBtn"><i class="bi bi-gear me-1"></i><span>Settings</span></a>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Controls: search/sort/filter -->
+  <div class="toolbar card border-0 shadow-sm rounded-4 p-3 mb-3">
+    <div class="row g-2 align-items-center">
+    <div class="col-md-4">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input id="searchInput" type="text" class="form-control" placeholder="Search requirements...">
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-arrow-down-up"></i></span>
+          <select id="sortSelect" class="form-select">
+            <option value="created_at">Sort by Created (asc)</option>
+            <option value="created_at_desc">Sort by Created (desc)</option>
+            <option value="title">Sort by Title</option>
+            <option value="priority">Sort by Priority</option>
+          </select>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-check2-square"></i></span>
+          <div class="dropdown flex-grow-1">
+            <button class="btn btn-outline-secondary dropdown-toggle w-100 d-flex align-items-center justify-content-between" type="button" id="stateFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
+              <span id="stateFilterLabel"><span class="badge text-bg-light border">All states</span></span>
+            </button>
+            <ul class="dropdown-menu w-100" aria-labelledby="stateFilterBtn" id="stateFilterMenu" style="min-width: 100%;">
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value=""><span class="badge text-bg-light border me-2">All states</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="unprocessed"><span class="badge bg-secondary me-2">Unprocessed</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="processing"><span class="badge bg-warning text-dark me-2">Processing</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="met"><span class="badge bg-success me-2">Met</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="partially_met"><span class="badge badge-status-partial me-2">Partially met</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="unmet"><span class="badge bg-danger me-2">Unmet</span></a></li>
+              <li><a class="dropdown-item d-flex align-items-center" href="#" data-value="error"><span class="badge bg-danger me-2">Error</span></a></li>
+            </ul>
+            <select id="statusFilter" class="form-select d-none">
+              <option value="" selected>All states</option>
+              <option value="unprocessed">Unprocessed</option>
+              <option value="processing">Processing</option>
+              <option value="met">Met</option>
+              <option value="partially_met">Partially met</option>
+              <option value="unmet">Unmet</option>
+              <option value="error">Error</option>
+            </select>
+          </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="input-group" id="tagFilterDropdown" data-bs-auto-close="outside">
+          <span class="input-group-text bg-white"><i class="bi bi-tags"></i></span>
+          <div class="dropdown flex-grow-1">
+            <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="tagFilterBtn" data-bs-toggle="dropdown" aria-expanded="false">
+              <span id="tagFilterLabel">Tags</span>
+            </button>
+            <ul class="dropdown-menu w-100" aria-labelledby="tagFilterBtn" id="tagFilterMenu" style="max-height: 300px; overflow-y: auto;"></ul>
+          </div>
+        </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Requirements List -->
+  <div id="requirementsList" class="list-group"></div>
+  <div id="emptyState" class="text-center text-muted py-5 d-none">
+    <div class="display-6 mb-2"><i class="bi bi-journal-minus"></i></div>
+    <div class="mb-2">No requirements match your filters.</div>
+  </div>
+</div>
+
+<!-- Add Requirement Modal -->
+<div class="modal fade" id="addReqModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add requirements</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addReqForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="id_requirements_input">Requirements</label>
+            <textarea id="id_requirements_input" name="requirements_input" rows="10" class="form-control" style="min-height:200px; overflow:auto; white-space:pre; font-family:monospace;" wrap="off" placeholder="Paste one or more requirements. You can write free text; we'll extract structured requirements."></textarea>
+            <div class="form-text">Paste free text or one requirement per line. We'll derive structured requirements automatically.</div>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="id_allow_guess" name="allow_guess" checked>
+            <label class="form-check-label" for="id_allow_guess">Allow the LLM to infer/guess missing details</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveReqBtn">Add requirements</button>
+      </div>
+    </div>
+  </div>
+ </div>
+
+<!-- Confirm Delete Requirement Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete requirement?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        This will permanently delete the requirement and its associated runs. This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><i class="bi bi-trash me-1"></i>Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  .soft-shadow { box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+  .req-item { border: 1px solid #e3e6eb; border-radius: 14px; transition: box-shadow .2s, transform .05s; margin-bottom: 12px; }
+  .req-item:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.06); transform: translateY(-1px); }
+  .req-item { position: relative; }
+  .req-item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 14px 0 0 14px; background: #ced4da; }
+  .req-item[data-status="met"]::before { background: #198754; }
+  .req-item[data-status="partially_met"]::before { background: #f97316; }
+  .req-item[data-status="unmet"]::before { background: #dc3545; }
+  .req-item[data-status="processing"]::before { background: #ffc107; }
+  .req-item[data-status="error"]::before { background: #dc3545; }
+  .action-btn { min-width: 170px; height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
+  .action-btn i { font-size: 1.1rem; }
+  .action-btn span { line-height: 1; }
+  .req-title { font-weight: 700; letter-spacing: .2px; }
+  .req-meta { color: #6c757d; }
+   /* Tag chips in requirement rows - match overview look and constrain width */
+   .req-tags .badge { background-color: transparent; color: #495057; border: 1px solid #ced4da; border-radius: 50rem; padding: .35rem .5rem; font-weight: 500; display: inline-block; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tag-chip { background-color: transparent; }
+  .tag-chip:hover { background-color: #f1f3f5; }
+  .badge-priority-low { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+  .badge-priority-medium { background: #fff3cd; color: #7a5d00; border: 1px solid #ffe69c; }
+  .badge-priority-high { background: #fdecea; color: #842029; border: 1px solid #ffcfcc; }
+  .num-circle { width: 36px; height: 36px; border-radius: 50%; background: #f1f3f5; display:flex; align-items:center; justify-content:center; font-weight:700; color:#6c757d; }
+  .icon-btn { width: 34px; height: 34px; border-radius: 10px; display:flex; align-items:center; justify-content:center; }
+  .action-group { background: #f8f9fb; border: 1px solid #b7c2d0; border-radius: 12px; }
+  .screenshot-frame { padding: 0; background: linear-gradient(180deg, #f8fafc, #eef2f6); border: 1px solid #b7c2d0; border-bottom: 1px solid #b7c2d0; border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden; }
+  .screenshot-img { width: 100%; height: 100%; object-fit: cover; object-position: top; border: 0; border-radius: 0; filter: saturate(1.02); box-shadow: none; }
+  .header-frame { border: 1px solid #b7c2d0; border-top: 0; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+  .action-panel-sticky { position: sticky; top: 1rem; }
+  .kpi-chip { cursor: pointer; user-select: none; }
+  .bg-partial { background: rgba(249, 115, 22, 0.25) !important; }
+  /* removed clamp styling (no toggle now) */
+  /* Hover-only border colors for action buttons */
+  #startUrlLink, #startUrlLink:hover, #startUrlLink:focus { text-decoration: none; }
+  #addReqBtn { border-color: #ced4da; }
+  #addReqBtn:hover, #addReqBtn:focus { border-color: #198754; color: #198754; background-color: rgba(25, 135, 84, .08); }
+  #summaryBtn { border-color: #ced4da; }
+  #summaryBtn:hover, #summaryBtn:focus { border-color: #f97316; color: #f97316; background-color: rgba(249, 115, 22, .08); }
+  /* Default neutral for delete; red on hover/focus */
+  #deleteAllBtn { border-color: #ced4da; color: #6c757d; }
+  #deleteAllBtn:hover, #deleteAllBtn:focus { border-color: #dc3545; color: #dc3545; background-color: rgba(220,53,69,.08); }
+  /* Settings button hover to neutral gray */
+  #settingsBtn { border-color: #ced4da; }
+  #settingsBtn:hover, #settingsBtn:focus { border-color: #6c757d; color: #6c757d; background-color: rgba(108,117,125,.10); }
+  /* Hover-revealed actions (visible on mobile) */
+  .req-actions { opacity: 0; transition: opacity .15s; }
+  .req-item:hover .req-actions { opacity: 1; }
+  @media (max-width: 576px) { .req-actions { opacity: 1; margin-top: .5rem; } }
+  /* Clamp description to two lines */
+  .text-truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  /* Utility: allow truncation inside flex */
+  .min-w-0 { min-width: 0; }
+  /* Match overview dropdown hover/active behavior */
+  #stateFilterBtn, #stateFilterBtn:focus, #stateFilterBtn:hover, #stateFilterBtn:active {
+    background-color: #fff !important; color: #212529; border-color: #ced4da; box-shadow: none;
+  }
+  .dropdown-menu { background-color: #fff !important; }
+  .dropdown-menu .dropdown-item { background-color: #fff !important; color: #212529; }
+   .dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus { background-color: #fff !important; color: #212529; }
+   /* Tag filter styles */
+   #tagFilterDropdown .dropdown-menu { background-color: #fff !important; }
+   #tagFilterDropdown .dropdown-item { background-color: #fff !important; color: #212529; }
+   #tagFilterDropdown .dropdown-item:hover, #tagFilterDropdown .dropdown-item:focus { background-color: #fff !important; color: #212529; }
+   #tagFilterBtn, #tagFilterBtn:focus, #tagFilterBtn:hover, #tagFilterBtn:active { background-color: #fff !important; color: #212529; border-color: #ced4da; box-shadow: none; }
+   #tagFilterMenu .tag-filter-item { gap: .25rem; }
+   #tagFilterMenu .tag-filter-label { display: inline-block; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+   @media (max-width: 576px) { #tagFilterMenu .tag-filter-label { max-width: 120px; } }
+  /* Partial status badges */
+  /* Strong (used in requirement rows) */
+  .badge-status-partial { background: #f97316; color: #ffffff; border: 1px solid #ea580c; }
+  /* Soft (used in KPI header chips) */
+  .badge-status-partial-soft { background: rgba(249, 115, 22, 0.10); color: #d97706; border: 1px solid rgba(249, 115, 22, 0.45); }
+</style>
+
+<script>
+  (function(){
+    const setupId = parseInt('{{ setup.id }}', 10);
+    let modal, addBtn;
+    let deleteModal, deleteTargetId = null;
+    let selectedStatus = '';
+    let selectedTags = [];
+    let allRequirements = [];
+    let sockets = {};
+    let overlay;
+    document.addEventListener('DOMContentLoaded', () => {
+      modal = new bootstrap.Modal(document.getElementById('addReqModal'));
+      deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+      addBtn = document.getElementById('addReqBtn');
+      if (addBtn) addBtn.addEventListener('click', () => modal.show());
+      document.getElementById('saveReqBtn').addEventListener('click', submitNewRequirement);
+      document.getElementById('searchInput').addEventListener('input', filterAndRender);
+      document.getElementById('sortSelect').addEventListener('change', filterAndRender);
+      document.getElementById('statusFilter').addEventListener('change', filterAndRender);
+      document.getElementById('startRunBtn').addEventListener('click', startAllRuns);
+      bindHeaderInteractions();
+      document.getElementById('summaryBtn')?.addEventListener('click', openSummary);
+      document.getElementById('deleteAllBtn')?.addEventListener('click', () => {
+        try {
+          const m = new bootstrap.Modal(document.getElementById('confirmDeleteAllModal'));
+          m.show();
+          document.getElementById('confirmDeleteAllBtn').onclick = function(){ m.hide(); deleteAllRequirements(); };
+        } catch(e) { deleteAllRequirements(); }
+      });
+      document.getElementById('confirmDeleteBtn')?.addEventListener('click', () => {
+        if (!deleteTargetId) return;
+        performDelete(deleteTargetId);
+        deleteTargetId = null;
+        deleteModal.hide();
+      });
+      // Bind state filter dropdown with badges
+      (function bindStateDropdown(){
+        const menu = document.getElementById('stateFilterMenu');
+        const label = document.getElementById('stateFilterLabel');
+        if (menu && label) {
+          menu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e){
+              e.preventDefault();
+              selectedStatus = this.getAttribute('data-value') || '';
+              const badge = this.querySelector('.badge').outerHTML;
+              label.innerHTML = badge;
+              document.getElementById('statusFilter').value = selectedStatus;
+              filterAndRender();
+            });
+          });
+        }
+      })();
+
+      fetchAll();
+      openSocketsForRequirements();
+      openSetupsSocket();
+      overlay = document.getElementById('processingOverlay');
+    });
+
+    // Ensure state is refreshed when navigating back/forward (including BFCache)
+    window.addEventListener('pageshow', function(event) {
+      // If page was restored from the bfcache, force a hard reload to avoid stale in-memory state
+      if (event.persisted) {
+        window.location.reload();
+        return;
+      }
+      // Otherwise, perform a fresh fetch and reopen sockets
+      fetchAll();
+      openSocketsForRequirements();
+    });
+
+    // Close any open sockets on pagehide so they don't deliver stale messages after BFCache restore
+    window.addEventListener('pagehide', function() {
+      try {
+        Object.values(sockets).forEach(ws => { try { ws.close(); } catch(e){} });
+      } catch(e) {}
+    });
+
+    function openSocketsForRequirements() {
+      // Close any existing sockets
+      Object.values(sockets).forEach(ws => { try { ws.close(); } catch(e){} });
+      sockets = {};
+      allRequirements.forEach(req => {
+        const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/runs/${req.id}/`);
+        ws.onmessage = (ev) => {
+          try {
+            const msg = JSON.parse(ev.data);
+            if (msg.phase === 'waiting_for_display') {
+              // Optimistically reflect processing while waiting for a display lease
+              allRequirements = allRequirements.map(r =>
+                r.id === req.id ? { ...r, status: 'processing' } : r
+              );
+              filterAndRender();
+            }
+            if (msg.requirement_status) {
+              allRequirements = allRequirements.map(r =>
+                r.id === req.id ? { ...r, status: msg.requirement_status } : r
+              );
+              filterAndRender();
+            }
+          } catch (e) {}
+        };
+        sockets[req.id] = ws;
+      });
+    }
+
+    function openSetupsSocket(){
+      try {
+        const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+        const ws = new WebSocket(`${proto}://${location.host}/ws/setups/`);
+        ws.onmessage = (ev) => {
+          try {
+            const msg = JSON.parse(ev.data);
+            if (!msg || String(msg.setup_id) !== String(setupId)) return;
+            const met = typeof msg.num_met === 'number' ? msg.num_met : null;
+            const unmet = typeof msg.num_unmet === 'number' ? msg.num_unmet : null;
+            const proc = typeof msg.num_processing === 'number' ? msg.num_processing : 0;
+            const err = typeof msg.num_error === 'number' ? msg.num_error : 0;
+            const unproc = typeof msg.num_unprocessed === 'number' ? msg.num_unprocessed : 0;
+            if (met !== null && unmet !== null) {
+              updateHeaderFromCounts({ met, unmet, processing: proc, error: err, unprocessed: unproc });
+            }
+          } catch(e){}
+        };
+      } catch(e) {}
+    }
+
+    function renderRequirement(r){
+      const statusBadge = badgeForStatus(r.status);
+      const tagsHtml = (r.tags||[]).map(t=>`<span class=\"badge rounded-pill text-secondary border me-1 tag-chip\">${escapeHtml(t)}</span>`).join('');
+      const prioClass = r.priority === 'high' ? 'badge-priority-high' : (r.priority === 'low' ? 'badge-priority-low' : 'badge-priority-medium');
+      return `
+        <div class="list-group-item req-item py-3 px-3" data-status="${escapeHtml(r.status || 'unprocessed')}">
+          <div class="d-flex align-items-center w-100 gap-3">
+            <div class="num-circle flex-shrink-0 d-flex align-items-center justify-content-center">${r.index}</div>
+
+            <a href="/requirements/${r.id}/runs/" class="flex-grow-1 text-decoration-none text-reset min-w-0">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="req-title text-truncate">${escapeHtml(r.title || '(no title)')}</div>
+                ${statusBadge}
+                <span class="badge ${prioClass} text-uppercase flex-shrink-0" style="letter-spacing:.3px;">${escapeHtml(r.priority)}</span>
+              </div>
+
+              <div class="req-meta small text-muted text-truncate-2">${escapeHtml(r.description || '')}</div>
+              ${tagsHtml ? `<div class=\"req-tags mt-2 d-flex flex-wrap gap-1\">${tagsHtml}</div>` : ''}
+              <div class="small text-muted mt-2 d-flex align-items-center gap-2"><i class="bi bi-calendar3"></i> ${r.created_at}</div>
+            </a>
+
+            <div class="req-actions ms-auto d-none d-sm-flex align-items-start">
+              <button class="btn btn-light border icon-btn me-2" title="Summary" data-summary="${r.id}">
+                <i class="bi bi-journal-text text-primary"></i>
+              </button>
+              <button class="btn btn-light border icon-btn" title="Delete" data-delete="${r.id}">
+                <i class="bi bi-trash text-danger"></i>
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function badgeForStatus(status){
+      if (status === 'met') return '<span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>';
+      if (status === 'partially_met') return '<span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>';
+      if (status === 'unmet') return '<span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>';
+      if (status === 'error') return '<span class="badge bg-danger">Error</span>';
+      if (status === 'processing') return '<span class="badge bg-warning text-dark d-inline-flex align-items-center"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span><span>Processing</span></span>';
+      return '<span class="badge bg-secondary">Unprocessed</span>';
+    }
+
+    function escapeHtml(str){
+      return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+    }
+
+    function fetchAll(){
+      fetch(`/setups/${setupId}/api/requirements/`)
+        .then(resp => resp.json())
+        .then(data => { allRequirements = data.requirements || []; buildTagFilterOptions(); filterAndRender(); openSocketsForRequirements(); });
+      // Also refresh runs status badges in the runs overview links (no-op if not present here)
+      // We do not optimistically set processing for requirements here; we rely on websocket and api_runs_list waiting state
+    }
+
+    function filterAndRender(){
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const sortBy = document.getElementById('sortSelect').value;
+      const status = document.getElementById('statusFilter').value;
+      let filtered = allRequirements.slice();
+      if (search) filtered = filtered.filter(r => (r.title||'').toLowerCase().includes(search) || (r.description||'').toLowerCase().includes(search));
+      if (status) filtered = filtered.filter(r => r.status === status);
+      if (selectedTags.length > 0) filtered = filtered.filter(r => (r.tags||[]).some(t => selectedTags.includes(t)));
+      filtered.sort((a,b)=>{
+        if (sortBy === 'title') return (a.title||'').localeCompare(b.title||'');
+        if (sortBy === 'priority') return (a.priority||'').localeCompare(b.priority||'');
+        if (sortBy === 'created_at_desc') return new Date(b.created_at) - new Date(a.created_at);
+        return new Date(a.created_at) - new Date(b.created_at);
+      });
+      const list = document.getElementById('requirementsList');
+      list.innerHTML = filtered.map((r,i)=> renderRequirement({...r, index: i+1})).join('');
+      // Empty state toggle
+      const empty = document.getElementById('emptyState');
+      empty.classList.toggle('d-none', filtered.length !== 0);
+      list.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteTargetId = btn.getAttribute('data-delete');
+        deleteModal.show();
+      }));
+      list.querySelectorAll('[data-summary]').forEach(btn => btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openRequirementSummary(btn.getAttribute('data-summary'), btn);
+      }));
+      // No-op for removed badge buttons
+      // Update header stats
+      updateHeaderStats(filtered);
+    }
+
+    function buildTagFilterOptions(){
+      const tagSet = new Set();
+      (allRequirements || []).forEach(r => (r.tags || []).forEach(t => tagSet.add(t)));
+      const tags = Array.from(tagSet).sort();
+      const menu = document.getElementById('tagFilterMenu');
+      if (!menu) return;
+      menu.innerHTML = tags.map(tag => `
+        <li>
+          <a href="#" class="dropdown-item d-flex align-items-center tag-filter-item" data-value="${tag}" onclick="event.preventDefault();">
+            <input type="checkbox" class="form-check-input me-2 tag-filter-checkbox" value="${tag}" ${selectedTags.includes(tag) ? 'checked' : ''}>
+            <span class="tag-filter-label" data-value="${tag}" title="${tag}">${tag}</span>
+          </a>
+        </li>`).join('');
+
+      menu.onclick = function(e){
+        const checkbox = e.target.closest('.tag-filter-checkbox');
+        const label = e.target.closest('.tag-filter-label');
+        let value = null;
+        if (checkbox){
+          value = checkbox.value;
+          const idx = selectedTags.indexOf(value);
+          if (checkbox.checked && idx === -1) selectedTags.push(value);
+          else if (!checkbox.checked && idx !== -1) selectedTags.splice(idx, 1);
+          updateTagFilterLabel();
+          buildTagFilterOptions();
+          filterAndRender();
+        } else if (label){
+          value = label.getAttribute('data-value');
+          const idx = selectedTags.indexOf(value);
+          if (idx === -1) selectedTags.push(value); else selectedTags.splice(idx, 1);
+          updateTagFilterLabel();
+          buildTagFilterOptions();
+          filterAndRender();
+        }
+      };
+      updateTagFilterLabel();
+    }
+
+    function updateTagFilterLabel(){
+      const label = document.getElementById('tagFilterLabel');
+      if (!label) return;
+      label.textContent = selectedTags.length === 0 ? 'Tags' : `${selectedTags.length} tag${selectedTags.length>1?'s':''}`;
+    }
+
+    function updateHeaderStats(current){
+      const total = allRequirements.length;
+      const met = allRequirements.filter(r => r.status === 'met').length;
+      const partial = allRequirements.filter(r => r.status === 'partially_met').length;
+      const processing = allRequirements.filter(r => r.status === 'processing').length;
+      const unmet = allRequirements.filter(r => r.status === 'unmet').length;
+      const error = allRequirements.filter(r => r.status === 'error').length;
+      const unprocessed = allRequirements.filter(r => r.status === 'unprocessed').length;
+      const totalBadge = document.getElementById('totalBadge');
+      const totalText = document.getElementById('totalBadgeText');
+      const metBadge = document.getElementById('metCountBadge');
+      const partialBadge = document.getElementById('partialCountBadge');
+      const processingBadge = document.getElementById('processingCountBadge');
+      const errorBadge = document.getElementById('errorCountBadge');
+      const unprocBadge = document.getElementById('unprocessedCountBadge');
+      const unmetBadge = document.getElementById('unmetCountBadge');
+      if (totalBadge) totalBadge.textContent = `${total} total`;
+      if (totalText) totalText.textContent = `${total} requirement${total===1?'':'s'}`;
+      if (metBadge) metBadge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Met: ${met}`;
+      if (partialBadge) { partialBadge.innerHTML = `<i class=\"bi bi-slash-circle-fill me-1\"></i>Partially met: ${partial}`; partialBadge.classList.toggle('d-none', partial === 0); }
+      if (processingBadge) { processingBadge.textContent = `Processing: ${processing}`; processingBadge.classList.toggle('d-none', processing === 0); }
+      if (errorBadge) { errorBadge.textContent = `Error: ${error}`; errorBadge.classList.toggle('d-none', error === 0); }
+      if (unmetBadge) unmetBadge.innerHTML = `<i class=\"bi bi-x-circle-fill me-1\"></i>Unmet: ${unmet}`;
+      if (unprocBadge) { unprocBadge.textContent = `Unprocessed: ${unprocessed}`; unprocBadge.classList.toggle('d-none', unprocessed === 0); }
+      const denom = Math.max(1, total);
+      const metPct = Math.round((met/denom)*100);
+      const partialPct = Math.min(100 - metPct, Math.round((partial/denom)*100));
+      const unmetPct = Math.min(100 - metPct - partialPct, Math.round((unmet/denom)*100));
+      const errPct = Math.min(100 - metPct - partialPct - unmetPct, Math.round((error/denom)*100));
+      const unprocPct = Math.min(100 - metPct - partialPct - unmetPct - errPct, Math.round((unprocessed/denom)*100));
+      const procPct = Math.min(100 - metPct - partialPct - unmetPct - errPct - unprocPct, Math.round((processing/denom)*100));
+      const metEl = document.getElementById('metBar');
+      const partialEl = document.getElementById('partialBar');
+      const unEl = document.getElementById('unmetBar');
+      const errEl = document.getElementById('errorBar');
+      const unprocEl = document.getElementById('unprocessedBar');
+      const procEl = document.getElementById('processingBar');
+      if (metEl) metEl.style.width = `${metPct}%`;
+      if (partialEl) { partialEl.style.width = `${partialPct}%`; partialEl.classList.toggle('d-none', partialPct === 0); }
+      if (unEl) unEl.style.width = `${unmetPct}%`;
+      if (errEl) { errEl.style.width = `${errPct}%`; errEl.classList.toggle('d-none', errPct === 0); }
+      if (unprocEl) { unprocEl.style.width = `${unprocPct}%`; unprocEl.classList.toggle('d-none', unprocPct === 0); }
+      if (procEl) { procEl.style.width = `${procPct}%`; procEl.classList.toggle('d-none', procPct === 0); }
+    }
+
+    function updateHeaderFromCounts(counts){
+      const met = counts.met || 0;
+      const unmet = counts.unmet || 0;
+      const processing = counts.processing || 0;
+      const error = counts.error || 0;
+      const unprocessed = counts.unprocessed || 0;
+      const total = Math.max(1, met + unmet + processing + error + unprocessed);
+      const partial = Math.max(0, total - (met + unmet + processing + error + unprocessed));
+      const totalBadge = document.getElementById('totalBadge');
+      const totalText = document.getElementById('totalBadgeText');
+      const metBadge = document.getElementById('metCountBadge');
+      const unmetBadge = document.getElementById('unmetCountBadge');
+      const partialBadge = document.getElementById('partialCountBadge');
+      const processingBadge = document.getElementById('processingCountBadge');
+      const errorBadge = document.getElementById('errorCountBadge');
+      const unprocBadge = document.getElementById('unprocessedCountBadge');
+      if (totalBadge) totalBadge.textContent = `${met+unmet+processing+error+unprocessed} total`;
+      if (totalText) totalText.textContent = `${met+unmet+processing+error+unprocessed} requirement${(met+unmet+processing+error+unprocessed)===1?'':'s'}`;
+      if (metBadge) metBadge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Met: ${met}`;
+      if (unmetBadge) unmetBadge.innerHTML = `<i class="bi bi-x-circle-fill me-1"></i>Unmet: ${unmet}`;
+      if (partialBadge) { partialBadge.innerHTML = `<i class="bi bi-slash-circle-fill me-1"></i>Partially met: ${partial}`; partialBadge.classList.toggle('d-none', partial === 0); }
+      if (processingBadge) { processingBadge.textContent = `Processing: ${processing}`; processingBadge.classList.toggle('d-none', processing === 0); }
+      if (errorBadge) { errorBadge.textContent = `Error: ${error}`; errorBadge.classList.toggle('d-none', error === 0); }
+      if (unprocBadge) { unprocBadge.textContent = `Unprocessed: ${unprocessed}`; unprocBadge.classList.toggle('d-none', unprocessed === 0); }
+      const metPct = Math.round((met/total)*100);
+      const partialPct = Math.min(100 - metPct, Math.round((partial/total)*100));
+      const unmetPct = Math.min(100 - metPct - partialPct, Math.round((unmet/total)*100));
+      const errPct = Math.min(100 - metPct - partialPct - unmetPct, Math.round((error/total)*100));
+      const unprocPct = Math.min(100 - metPct - partialPct - unmetPct - errPct, Math.round((unprocessed/total)*100));
+      const procPct = Math.min(100 - metPct - partialPct - unmetPct - errPct - unprocPct, Math.round((processing/total)*100));
+      const metEl = document.getElementById('metBar');
+      const partialEl = document.getElementById('partialBar');
+      const unEl = document.getElementById('unmetBar');
+      const errEl = document.getElementById('errorBar');
+      const unprocEl = document.getElementById('unprocessedBar');
+      const procEl = document.getElementById('processingBar');
+      if (metEl) metEl.style.width = `${metPct}%`;
+      if (partialEl) { partialEl.style.width = `${partialPct}%`; partialEl.classList.toggle('d-none', partialPct === 0); }
+      if (unEl) unEl.style.width = `${unmetPct}%`;
+      if (errEl) { errEl.style.width = `${errPct}%`; errEl.classList.toggle('d-none', errPct === 0); }
+      if (unprocEl) { unprocEl.style.width = `${unprocPct}%`; unprocEl.classList.toggle('d-none', unprocPct === 0); }
+      if (procEl) { procEl.style.width = `${procPct}%`; procEl.classList.toggle('d-none', procPct === 0); }
+    }
+
+    function bindHeaderInteractions(){
+      // KPI chips click to filter
+      document.querySelectorAll('.kpi-chip').forEach(el => {
+        el.addEventListener('click', () => setHeaderFilter(el.getAttribute('data-status'), el.outerHTML));
+        el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setHeaderFilter(el.getAttribute('data-status'), el.outerHTML); }});
+      });
+      // No copy URL or description toggle required
+      // Screenshot lightbox
+      const thumb = document.getElementById('screenshotThumb');
+      const modalEl = document.getElementById('screenshotModal');
+      if (thumb && modalEl) {
+        const screenshotModal = new bootstrap.Modal(modalEl);
+        thumb.addEventListener('click', () => screenshotModal.show());
+      }
+    }
+
+    function setHeaderFilter(status, badgeHtml){
+      selectedStatus = status || '';
+      const label = document.getElementById('stateFilterLabel');
+      if (label && badgeHtml) label.innerHTML = badgeHtml;
+      document.getElementById('statusFilter').value = selectedStatus;
+      filterAndRender();
+    }
+
+    function openSummary(){
+      try {
+        const btn = document.getElementById('summaryBtn');
+        if (btn) { btn.disabled = true; btn.dataset.old = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading…'; }
+        const statuses = getSelectedStatuses();
+        const qs = statuses.length ? ('?statuses=' + encodeURIComponent(statuses.join(','))) : '';
+        fetch(`/setups/${setupId}/api/summary/${qs}`)
+          .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+          .then(data => {
+            const txt = (data && data.text) ? String(data.text) : '';
+            const el = document.getElementById('summaryText');
+            if (el) { el.value = txt || 'No summaries available yet.'; }
+            const mEl = document.getElementById('summaryModal');
+            if (mEl && window.bootstrap) { const m = new bootstrap.Modal(mEl); m.show(); }
+            bindSummaryToggles();
+          })
+          .catch(()=>{
+            const el = document.getElementById('summaryText');
+            if (el) { el.value = 'No summaries available or an error occurred.'; }
+            const mEl = document.getElementById('summaryModal');
+            if (mEl && window.bootstrap) { const m = new bootstrap.Modal(mEl); m.show(); }
+            bindSummaryToggles();
+          })
+          .finally(()=>{ if (btn) { btn.disabled = false; btn.innerHTML = btn.dataset.old || 'Summary'; delete btn.dataset.old; }});
+      } catch(_) {}
+    }
+    function openRequirementSummary(reqId, btn){
+      try {
+        if (btn) { btn.disabled = true; btn.dataset.old = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'; }
+        fetch(`/requirements/${reqId}/api/summary/`)
+          .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+          .then(data => {
+            const txt = (data && data.text) ? String(data.text) : '';
+            const el = document.getElementById('summaryText');
+            if (el) { el.value = txt || 'No summary available yet for this requirement.'; }
+            // Set dynamic title
+            const mt = document.getElementById('summaryModalTitle');
+            let title = '';
+            try {
+              const rid = parseInt(reqId, 10);
+              const reqObj = (allRequirements||[]).find(x => Number(x.id) === rid);
+              title = reqObj ? (reqObj.title || '') : '';
+            } catch(_) {}
+            if (mt) { mt.textContent = title ? `Requirement Summary: ${title}` : 'Requirement Summary'; }
+            const mEl = document.getElementById('summaryModal');
+            if (mEl && window.bootstrap) { const m = new bootstrap.Modal(mEl); m.show(); }
+          })
+          .catch(() => {
+            const el = document.getElementById('summaryText');
+            if (el) { el.value = 'No summary available or an error occurred.'; }
+            const mt = document.getElementById('summaryModalTitle');
+            if (mt) { mt.textContent = 'Requirement Summary'; }
+            const mEl = document.getElementById('summaryModal');
+            if (mEl && window.bootstrap) { const m = new bootstrap.Modal(mEl); m.show(); }
+          })
+          .finally(() => { if (btn) { btn.disabled = false; btn.innerHTML = btn.dataset.old || '<i class="bi bi-journal-text text-primary"></i>'; delete btn.dataset.old; }});
+      } catch(_) {}
+    }
+    function getSelectedStatuses(){
+      const selected = [];
+      const m = document.getElementById('summaryFilterMet');
+      const p = document.getElementById('summaryFilterPartial');
+      const u = document.getElementById('summaryFilterUnmet');
+      if (m && m.checked) selected.push('met');
+      if (p && p.checked) selected.push('partially_met');
+      if (u && u.checked) selected.push('unmet');
+      return selected;
+    }
+    function bindSummaryToggles(){
+      try {
+        const ids = ['summaryFilterMet','summaryFilterPartial','summaryFilterUnmet'];
+        let anyBound = false;
+        ids.forEach((id)=>{
+          const el = document.getElementById(id);
+          if (!el || el.dataset.bound === '1') return;
+          el.addEventListener('change', function(){
+          const btn = document.getElementById('summaryBtn');
+          if (btn) { btn.disabled = true; btn.dataset.old = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading…'; }
+          const statuses = getSelectedStatuses();
+          const qs = statuses.length ? ('?statuses=' + encodeURIComponent(statuses.join(','))) : '';
+          fetch(`/setups/${setupId}/api/summary/${qs}`)
+            .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+            .then(data => {
+              const txt = (data && data.text) ? String(data.text) : '';
+              const el = document.getElementById('summaryText');
+              if (el) { el.value = txt || 'No summaries available yet.'; }
+            })
+            .catch(()=>{
+              const el = document.getElementById('summaryText');
+              if (el) { el.value = 'No summaries available or an error occurred.'; }
+            })
+            .finally(()=>{ if (btn) { btn.disabled = false; btn.innerHTML = btn.dataset.old || 'Summary'; delete btn.dataset.old; }});
+          });
+          el.dataset.bound = '1';
+          anyBound = true;
+        });
+      } catch(_) {}
+    }
+
+    function deleteAllRequirements(){
+      const setupId = parseInt('{{ setup.id }}', 10);
+      const csrf = getCsrfToken();
+      fetch(`/setups/${setupId}/api/requirements/delete_all/`, { method: 'POST', headers: { 'X-CSRFToken': csrf } })
+        .then(() => fetchAll());
+    }
+
+    function submitNewRequirement(){
+      const form = document.getElementById('addReqForm');
+      const fd = new FormData(form);
+      const btn = document.getElementById('saveReqBtn');
+      const oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Processing…';
+      showOverlay();
+      fetch(`/setups/${setupId}/api/requirements/add/`, { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() }, body: fd })
+        .then(r => { if (!r.ok) throw new Error('Failed to add'); return r.json(); })
+        .then(data => {
+          const created = Array.isArray(data.created) ? data.created : [];
+          if (created.length) {
+            allRequirements = allRequirements.concat(created);
+            filterAndRender();
+            openSocketsForRequirements();
+          }
+          modal.hide();
+          form.reset();
+        })
+        .catch(()=>{})
+        .finally(()=>{ btn.disabled = false; btn.innerHTML = oldHtml; hideOverlay(); });
+    }
+
+    function performDelete(id){
+      fetch(`/setups/${setupId}/api/requirements/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() } })
+        .then(()=> fetchAll());
+    }
+
+    function startAllRuns(){
+      const btn = document.getElementById('startRunBtn');
+      if (!btn) return;
+      const oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Starting...';
+      fetch(`/setups/${setupId}/api/runs/start_all/`, { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() } })
+        .then(r => { if (!r.ok) throw new Error('Failed to start runs'); return r.json(); })
+        .then(() => {
+          // Optimistically reflect processing for unprocessed requirements
+          let changed = false;
+          allRequirements = allRequirements.map(r => {
+            if (r.status === 'unprocessed') { changed = true; return { ...r, status: 'processing' }; }
+            return r;
+          });
+          if (changed) filterAndRender();
+        })
+        .catch(() => {})
+        .finally(() => { btn.disabled = false; btn.innerHTML = oldHtml; });
+    }
+
+    function getCsrfToken(){
+      const name = 'csrftoken=';
+      const parts = document.cookie.split(';');
+      for (let i=0; i<parts.length; i++){
+        const c = parts[i].trim();
+        if (c.startsWith(name)) return decodeURIComponent(c.substring(name.length));
+      }
+      // fallback from template
+      const el = document.querySelector('input[name=csrfmiddlewaretoken]');
+      return el ? el.value : '';
+    }
+    document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('sortSelect').value = 'created_at';
+      filterAndRender();
+    });
+
+  })();
+</script>
+<!-- Full-screen processing overlay -->
+<div id="processingOverlay" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.85); backdrop-filter:saturate(180%) blur(3px); z-index: 2000;">
+  <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
+    <div class="mb-3" style="font-size:2.5rem;color:#0d6efd;">
+      <i class="bi bi-journal-text"></i>
+    </div>
+    <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true" style="width:3rem;height:3rem;"></div>
+    <div class="fw-semibold" style="font-size:1.1rem; color:#0d6efd;">Processing requirements…</div>
+    <div class="text-muted mt-1">Extracting structured requirements with the LLM.</div>
+  </div>
+</div>
+
+<!-- Aggregated Summary Modal -->
+<div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="summaryModalTitle">Aggregated Summary</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+          <div class="small text-muted">Each section combines the requirement text followed by the latest run's detailed summary.</div>
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="form-check form-switch d-inline-flex align-items-center gap-2 m-0">
+              <input class="form-check-input" type="checkbox" id="summaryFilterMet">
+              <label class="form-check-label" for="summaryFilterMet">
+                <span class="badge bg-success d-inline-flex align-items-center"><i class="bi bi-check-circle-fill me-1"></i><span>Met</span></span>
+              </label>
+            </div>
+            <div class="form-check form-switch d-inline-flex align-items-center gap-2 m-0">
+              <input class="form-check-input" type="checkbox" id="summaryFilterPartial" checked>
+              <label class="form-check-label" for="summaryFilterPartial">
+                <span class="badge badge-status-partial d-inline-flex align-items-center"><i class="bi bi-slash-circle-fill me-1"></i><span>Partially met</span></span>
+              </label>
+            </div>
+            <div class="form-check form-switch d-inline-flex align-items-center gap-2 m-0">
+              <input class="form-check-input" type="checkbox" id="summaryFilterUnmet" checked>
+              <label class="form-check-label" for="summaryFilterUnmet">
+                <span class="badge bg-danger d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i><span>Unmet</span></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <textarea id="summaryText" class="form-control" rows="16" style="white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" id="copySummaryBtn"><i class="bi bi-clipboard"></i> Copy</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+  </div>
+  </div>
+  </div>
+<!-- Toast below modal (bottom-right of viewport) -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+  <div id="summaryCopyToast" class="toast align-items-center text-bg-light border-0" role="status" aria-live="polite" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center"><i class="bi bi-clipboard-check me-2 text-success"></i>Copied to clipboard</div>
+      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+<script>
+  (function(){
+    function bindCopy(){
+      const btn = document.getElementById('copySummaryBtn');
+      const ta = document.getElementById('summaryText');
+      const toastEl = document.getElementById('summaryCopyToast');
+      if (!btn || !ta) return;
+      btn.addEventListener('click', function(e){
+        try { e.preventDefault(); } catch(_) {}
+        try {
+          ta.focus();
+          ta.select();
+          let ok = false;
+          try { ok = document.execCommand('copy'); } catch(_) {}
+          const i = btn.querySelector('i');
+          if (i) { i.classList.remove('bi-clipboard'); i.classList.add('bi-clipboard-check'); }
+          try {
+            if (toastEl && window.bootstrap && bootstrap.Toast) {
+              const t = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 1400 });
+              t.show();
+            } else if (toastEl) {
+              toastEl.classList.add('show');
+              toastEl.style.display = 'block';
+              setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.style.display = 'none'; }, 1400);
+            }
+          } catch(_) {}
+          setTimeout(()=>{ if (i) { i.classList.remove('bi-clipboard-check'); i.classList.add('bi-clipboard'); } }, 1200);
+        } catch(_) {}
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindCopy); else bindCopy();
+  })();
+  </script>
+<script>
+  function showOverlay(){
+    const overlay = document.getElementById('processingOverlay');
+    if (!overlay) return;
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    document.body.setAttribute('aria-busy', 'true');
+  }
+  function hideOverlay(){
+    const overlay = document.getElementById('processingOverlay');
+    if (!overlay) return;
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+    document.body.removeAttribute('aria-busy');
+  }
+</script>
+<!-- Screenshot Lightbox Modal -->
+<div class="modal fade" id="screenshotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        {% if setup.screenshot %}
+        <img src="{{ setup.screenshot.url }}" alt="Screenshot enlarged" style="width:100%;height:auto;display:block;">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete All Requirements Modal -->
+<div class="modal fade" id="confirmDeleteAllModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete all requirements?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        This will permanently delete all requirements and their runs. This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteAllBtn"><i class="bi bi-trash me-1"></i>Delete all</button>
+      </div>
+    </div>
+  </div>
+  </div>
+{% endblock %}
+
+

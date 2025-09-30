@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Edit Setup{% endblock %}
+{% block content %}
+<div class="container py-5" style="min-height: 80vh; background: linear-gradient(120deg, #f8fafc 60%, #e9ecef 100%);">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card shadow rounded-4 border-0">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <span class="display-5 text-primary"><i class="bi bi-gear"></i></span>
+            <h2 class="fw-bold mt-2 mb-1">Edit Setup</h2>
+            <p class="text-muted mb-0">Update setup properties</p>
+          </div>
+          <form method="post" action="{% url 'setups:edit' setup.id %}" autocomplete="off">
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_name">Name</label>
+              {{ form.name }}
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_start_url">Start URL</label>
+              {{ form.start_url }}
+            </div>
+            <div class="mb-4">
+              <label for="agent_model" class="form-label fw-semibold">MLLM Agent</label>
+              <div class="dropdown w-100">
+                <button class="btn bg-white border form-control text-start d-flex justify-content-between align-items-center" type="button" id="agentDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span id="agentDropdownLabel">Select agent</span>
+                  <i class="bi bi-caret-down ms-2"></i>
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="agentDropdownBtn" id="agentDropdownMenu">
+                  {% for value, display in agent_options %}
+                    <li><button type="button" class="dropdown-item" data-value="{{ value }}">{{ display }}</button></li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div class="d-none">{{ form.agent_model }}</div>
+            </div>
+            <div class="mb-4">
+              <label for="llm_model" class="form-label fw-semibold">LLM</label>
+              <div class="dropdown w-100">
+                <button class="btn bg-white border form-control text-start d-flex justify-content-between align-items-center" type="button" id="llmDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span id="llmDropdownLabel">Select model</span>
+                  <i class="bi bi-caret-down ms-2"></i>
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="llmDropdownBtn" id="llmDropdownMenu">
+                  {% for value, display in llm_options %}
+                    <li><button type="button" class="dropdown-item" data-value="{{ value }}">{{ display }}</button></li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div class="d-none">{{ form.llm_model }}</div>
+            </div>
+            <div class="mb-4">
+              <label for="id_agent_timeout_seconds" class="form-label fw-semibold">Agent Timeout (seconds)</label>
+              {{ form.agent_timeout_seconds }}
+            </div>
+            <div class="mb-4">
+              <label for="id_max_retries" class="form-label fw-semibold">Maximum Retries</label>
+              {{ form.max_retries }}
+            </div>
+            <div class="mb-4">
+              <label for="id_max_reasoning_steps" class="form-label fw-semibold">Maximum Reasoning Steps</label>
+              {{ form.max_reasoning_steps }}
+            </div>
+            <!-- User-provided Inputs (key/value pairs) -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">User-provided Inputs
+                <i class="bi bi-info-circle ms-2" data-bs-toggle="tooltip" title="Specify key/value pairs the agent should use when fields match these names (e.g., 'phone', 'email')."></i>
+              </label>
+              <div id="inputs-list"></div>
+              <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-input-btn"><i class="bi bi-plus"></i> Add Input</button>
+              <input type="hidden" name="inputs_json" id="inputs_json">
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_tags_input">Tags</label>
+              {{ form.tags_input }}
+            </div>
+            <div class="row mt-4 g-2">
+              <div class="col-12 col-sm-6">
+                <a href="{% url 'setups:open' setup.id %}" class="btn btn-outline-secondary w-100 rounded-3">Cancel</a>
+              </div>
+              <div class="col-12 col-sm-6">
+                <button type="submit" class="btn btn-primary w-100 rounded-3"><i class="bi bi-save me-2"></i>Save</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script>
+  (function(){
+    document.addEventListener('DOMContentLoaded', function(){
+      function initDropdown(selectName, btnId, labelId, menuId){
+        var selectEl = document.getElementsByName(selectName)[0];
+        var btnEl = document.getElementById(btnId);
+        var labelEl = document.getElementById(labelId);
+        var menuEl = document.getElementById(menuId);
+        if (!selectEl || !btnEl || !labelEl || !menuEl) return;
+        try {
+          var currentText = '';
+          for (var i=0;i<selectEl.options.length;i++){
+            if (selectEl.options[i].selected){ currentText = selectEl.options[i].text; break; }
+          }
+          if (currentText) labelEl.textContent = currentText;
+        } catch(e){}
+        menuEl.querySelectorAll('.dropdown-item').forEach(function(item){
+          item.addEventListener('click', function(){
+            var val = item.getAttribute('data-value');
+            Array.from(selectEl.options).forEach(function(opt){ opt.selected = (opt.value === val); });
+            labelEl.textContent = item.textContent;
+          });
+        });
+      }
+      initDropdown('agent_model', 'agentDropdownBtn', 'agentDropdownLabel', 'agentDropdownMenu');
+      initDropdown('llm_model', 'llmDropdownBtn', 'llmDropdownLabel', 'llmDropdownMenu');
+      // Inputs editor
+      try { window.initialInputs = JSON.parse('{{ initial_inputs_json|default:"[]"|escapejs }}'); } catch(e){ window.initialInputs = []; }
+      var inputPairs = Array.isArray(window.initialInputs) ? window.initialInputs : [];
+      function renderInputs(){
+        var list = document.getElementById('inputs-list');
+        if (!list) return;
+        list.innerHTML = '';
+        inputPairs.forEach(function(pair, idx){
+          var row = document.createElement('div');
+          row.className = 'input-group mb-2';
+          row.innerHTML = '\n'
+            + '  <input type="text" class="form-control" placeholder="Key (e.g., phone number)" value="' + (pair.key || '') + '" onchange="updateInputPair(' + idx + ', \'key\', this.value)">\n'
+            + '  <input type="text" class="form-control" placeholder="Value (e.g., 555-123-4567)" value="' + (pair.value || '') + '" onchange="updateInputPair(' + idx + ', \'value\', this.value)">\n'
+            + '  <button type="button" class="btn btn-outline-danger" onclick="removeInputPair(' + idx + ')"><i class="bi bi-trash"></i></button>\n';
+          list.appendChild(row);
+        });
+        var hidden = document.getElementById('inputs_json');
+        if (hidden) hidden.value = JSON.stringify(inputPairs);
+      }
+      window.addInputPair = function(){ inputPairs.push({ key: '', value: '' }); renderInputs(); }
+      window.removeInputPair = function(idx){ inputPairs.splice(idx, 1); renderInputs(); }
+      window.updateInputPair = function(idx, field, value){ inputPairs[idx][field] = value; var hidden = document.getElementById('inputs_json'); if (hidden) hidden.value = JSON.stringify(inputPairs); }
+      var addBtn = document.getElementById('add-input-btn'); if (addBtn) addBtn.onclick = window.addInputPair;
+      renderInputs();
+    });
+  })();
+</script>
+{% endblock %}
