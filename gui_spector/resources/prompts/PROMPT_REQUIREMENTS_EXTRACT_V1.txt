@@ -1,0 +1,46 @@
+You are an expert requirements analyst.
+
+Task:
+- Read the provided plain text which may contain one or more product requirements.
+- Extract a structured list of requirements as a single JSON array.
+
+Output requirements schema (each element in the array must be an object with these keys):
+- "title": string (short requirement title; MAY be inferred even if absent)
+- "description": string (non-empty; 1–3 sentences describing the requirement; see field rules)
+- "tags": array of strings (keywords/tags; MAY be inferred even if absent)
+- "acceptance_criteria": array of strings (bullet-style criteria; see field rules)
+- "priority": one of ["low", "medium", "high"] or null (see field rules)
+- "source": string or null (see field rules)
+- "metadata": object (free-form additional fields; may be empty)
+
+Estimation policy:
+- ALLOW_GUESS = {{ALLOW_GUESS}}
+- DEFAULT_PRIORITY = {{DEFAULT_PRIORITY}}
+- General rule: Prefer verbatim extraction over rewriting whenever the text explicitly provides a value.
+- If ALLOW_GUESS = false:
+  - Do NOT invent or paraphrase values for "description", "acceptance_criteria", "priority", or "source".
+  - Description MUST be present in the text and copied verbatim (allow minimal whitespace normalization).
+  - For remaining fields: if not explicitly present, set acceptance_criteria=[], priority=null, source=null.
+  - "title" and "tags" SHOULD still be produced; extract if present, otherwise infer reasonable values.
+- If ALLOW_GUESS = true:
+  - First extract any explicitly stated "description", "acceptance_criteria", "priority", and "source" without rewriting.
+  - If any of these are missing, infer them reasonably from context.
+  - If priority cannot be confidently inferred, use DEFAULT_PRIORITY.
+  - Never overwrite explicit values with guesses.
+
+Field-specific rules:
+- Title: Always provide a concise title. Extract when present; otherwise infer.
+- Tags: Always provide 2–7 relevant tags. Extract or infer; normalize to lowercase words or short phrases.
+- Description: Always required and non-empty. When ALLOW_GUESS=false, include a requirement only if a description is explicitly present; copy verbatim with minimal whitespace normalization. When ALLOW_GUESS=true, if absent, infer a concise 1–3 sentence description.
+- Acceptance_criteria: Keep each criterion a short, testable statement. If absent and guessing is allowed, provide 2–6 sensible criteria; otherwise [].
+- Priority: If present, map to one of low/medium/high. If absent: priority=null when ALLOW_GUESS=false; when ALLOW_GUESS=true, infer or set to DEFAULT_PRIORITY.
+- Source: If present in the input/context (e.g., a filename, section header, or provided field), set it. If absent: source=null unless ALLOW_GUESS=true and inference is strongly supported by context.
+
+Formatting rules:
+- OUTPUT ONLY a single JSON array. No prose, no code fences.
+- Ensure valid JSON. Do not include comments.
+
+Input text:
+{{INPUT_TEXT}}
+
+

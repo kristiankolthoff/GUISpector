@@ -1,0 +1,103 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1) Install Xfce, x11vnc, Xvfb, xdotool, etc., but remove any screen lockers or power managers
+RUN apt-get update && apt-get install -y \
+    xfce4 \
+    xfce4-goodies \
+    x11vnc \
+    xvfb \
+    xdotool \
+    imagemagick \
+    x11-apps \
+    sudo \
+    software-properties-common \
+    imagemagick \
+    xdg-utils \
+    desktop-file-utils \
+ && apt-get remove -y light-locker xfce4-screensaver xfce4-power-manager || true \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 2) Add the mozillateam PPA and install Firefox ESR
+RUN add-apt-repository ppa:mozillateam/ppa \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends firefox-esr \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Ensure /usr/bin/firefox exists and points to the ESR binary
+RUN [ -e /usr/bin/firefox ] || ln -s /usr/bin/firefox-esr /usr/bin/firefox
+
+# Replace the default Firefox launcher with firefox-multi for seamless multi-profile support
+RUN mv /usr/bin/firefox /usr/bin/firefox-original \
+    && ln -s /usr/local/bin/firefox-multi /usr/bin/firefox
+
+# Copy the firefox-multi script and make it executable
+COPY firefox-multi /usr/local/bin/firefox-multi
+RUN chmod +x /usr/local/bin/firefox-multi
+
+# Now that /usr/bin/firefox points to our wrapper, set it as system default browser
+RUN update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/firefox 200 \
+ && update-alternatives --set x-www-browser /usr/bin/firefox || true
+
+# Provide a desktop entry for firefox-multi so desktop environments can launch it
+RUN mkdir -p /usr/local/share/applications \
+ && printf '%s\n' \
+  '[Desktop Entry]' \
+  'Name=Firefox (Multi-Profile)' \
+  'Comment=Web Browser with per-display profiles' \
+  'Exec=/usr/local/bin/firefox-multi %u' \
+  'Terminal=false' \
+  'Type=Application' \
+  'Icon=firefox-esr' \
+  'Categories=Network;WebBrowser;' \
+  'MimeType=x-scheme-handler/http;x-scheme-handler/https;text/html;' \
+  > /usr/local/share/applications/firefox-multi.desktop \
+ && update-desktop-database /usr/local/share/applications || true
+
+# Ensure the upstream Firefox desktop files launch our wrapper explicitly
+RUN sed -i 's|^Exec=.*|Exec=/usr/local/bin/firefox-multi %u|' /usr/share/applications/firefox-esr.desktop || true \
+ && sed -i 's|^Exec=.*|Exec=/usr/local/bin/firefox-multi %u|' /usr/share/applications/firefox.desktop || true
+
+# Make Xfce's generic Web Browser launcher point to firefox-multi
+RUN sed -i 's|^Exec=.*|Exec=/usr/local/bin/firefox-multi %u|' /usr/share/applications/xfce4-web-browser.desktop || true \
+ && sed -i 's|^TryExec=.*|TryExec=/usr/local/bin/firefox-multi|' /usr/share/applications/xfce4-web-browser.desktop || true \
+ && update-desktop-database /usr/share/applications || true
+
+# Set firefox-multi as the default browser for Xfce (for http/https links)
+RUN xdg-mime default firefox-multi.desktop x-scheme-handler/http x-scheme-handler/https || true
+
+# 3) Create non-root user
+RUN useradd -ms /bin/bash myuser \
+    && echo "myuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER myuser
+WORKDIR /home/myuser
+
+# 4) Set x11vnc password ("secret")
+RUN x11vnc -storepasswd secret /home/myuser/.vncpass
+
+# Set Xfce preferred web browser to our firefox-multi desktop entry for panel/browser icon
+RUN mkdir -p /home/myuser/.config/xfce4 \
+ && printf '%s\n' '[Preferred Applications]' 'WebBrowser=firefox-multi.desktop' > /home/myuser/.config/xfce4/helpers.rc
+
+# Expose ports for multiple VNC servers (for 5 displays by default)
+EXPOSE 5900 5901 5902 5903 5904
+
+# Set default number of displays
+ENV NUM_DISPLAYS=5
+ENV SCREEN_RESOLUTION=1280x800x24
+
+# Start multiple Xvfb, x11vnc, and Xfce sessions for each display
+# Xvfb :$DISPLAY_NUM -screen 0 1280x800x24 >/dev/null 2>&1 & \
+CMD ["/bin/sh", "-c", "\
+  for i in $(seq 0 $((NUM_DISPLAYS-1))); do \
+    DISPLAY_NUM=$((99+i)); \
+    PORT=$((5900+i)); \
+    Xvfb :$DISPLAY_NUM -screen 0 $SCREEN_RESOLUTION >/dev/null 2>&1 & \
+    sleep 0.3; \
+    x11vnc -display WAIT:$DISPLAY_NUM -forever -rfbauth /home/myuser/.vncpass -listen 0.0.0.0 -rfbport $PORT >/dev/null 2>&1 & \
+    export DISPLAY=:$DISPLAY_NUM; \
+    startxfce4 >/dev/null 2>&1 & \
+  done; \
+  sleep 2 && echo 'Container running with multiple displays!' && tail -f /dev/null \
+"]
+

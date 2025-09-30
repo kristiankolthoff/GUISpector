@@ -1,0 +1,37 @@
+[project]
+name = "gui-spector"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Kristian Kolthoff",email = "kristian.kolthoff@tu-clausthal.de"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "playwright (>=1.55.0,<2.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "pillow (>=11.3.0,<12.0.0)",
+    "browserbase (>=1.4.0,<2.0.0)",
+    "openai (>=1.108.1,<2.0.0)",
+    "daphne (>=4.2.1,<5.0.0)",
+    "django (>=5.2.6,<6.0.0)",
+    "redis (>=6.4.0,<7.0.0)",
+    "mysqlclient (>=2.2.7,<3.0.0)",
+    "celery (>=5.5.3,<6.0.0)",
+    "langchain-anthropic (>=0.3.20,<0.4.0)",
+    "langchain-google-genai (>=2.1.12,<3.0.0)",
+    "langchain-openai (>=0.3.33,<0.4.0)",
+    "channels (>=4.3.1,<5.0.0)",
+    "channels-redis (>=4.3.0,<5.0.0)",
+    "chromium (>=0.0.0,<0.0.1)",
+    "mcp (>=1.14.1,<2.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pandas (>=2.0.0,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "gui_spector", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

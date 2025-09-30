@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "gui-spector": {
+      "command": "workspaces\\tuc_workspace\\GUI-Spector\\gui_spector\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-u",
+        "workspaces/tuc_workspace/GUI-Spector/mcp/agent_mcp_server.py"
+      ]
+    }
+  }
+}
+
+

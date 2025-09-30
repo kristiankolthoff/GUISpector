@@ -1,0 +1,14 @@
+*.env
+.cursorignore
+.cursor/
+infos.txt
+notebooks/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+gui_rerank/resources/datasets/
+gui_rerank/resources/examples/
+requirements.txt
+requirements_wsl.txt
+webapp/requirements.txt
+/webapp/media/

@@ -1,0 +1,14 @@
+#!/bin/bash
+# firefox-multi: Launch Firefox with a unique profile per X11 display
+
+# Extract display number, e.g., :99 -> 99
+DISPLAY_NUM=$(echo $DISPLAY | sed 's/://')
+PROFILE_DIR="$HOME/.mozilla/firefox/profile$DISPLAY_NUM"
+
+# Create profile if it doesn't exist
+if [ ! -d "$PROFILE_DIR" ]; then
+  /usr/bin/firefox-original --no-remote --CreateProfile "profile$DISPLAY_NUM $PROFILE_DIR"
+fi
+
+# Launch Firefox with the unique profile
+exec /usr/bin/firefox-original --no-remote --profile "$PROFILE_DIR" "$@"
