@@ -4,6 +4,8 @@ This repository contains the supplementary material and implementation for our s
 
 ### Introduction and Overview
 
+<img src="https://raw.githubusercontent.com/kristiankolthoff/GUISpector/refs/heads/main/webapp/media/static/overview/overview_gui_spector.png" width="100%">
+
 GUISpector adapts a multi‑modal LLM agent to interpret and operationalize NL requirements, autonomously planning and executing verification trajectories over GUI applications. It systematically extracts detailed NL feedback from the verification process—highlighting satisfied, partially satisfied, and unmet acceptance criteria—to guide developers in refining their GUI artifacts, or to directly inform LLM-based code generation.
 
 An integrated web application unifies these capabilities, allowing practitioners to:
@@ -13,7 +15,12 @@ An integrated web application unifies these capabilities, allowing practitioners
 
 We evaluated GUISpector on 150 requirements with 900 acceptance criteria across diverse GUIs, demonstrating effective detection of satisfaction and violations, and highlighting its potential for seamless integration into automated LLM-driven development workflows.
 
-A short video presentation showcasing the system is available here: [https://youtu.be/JByYF6BNQeE](https://youtu.be/JByYF6BNQeE).
+A short video presentation showcasing the system is available here:
+
+<a href="https://youtu.be/JByYF6BNQeE" target="_blank">
+  <img src="https://raw.githubusercontent.com/kristiankolthoff/GUISpector/refs/heads/main/webapp/media/static/youtube/gui_spector_youtube.png" alt="Watch the video" style="max-width:100%;"/>
+</a>
+
 
 ### Project Structure
 
