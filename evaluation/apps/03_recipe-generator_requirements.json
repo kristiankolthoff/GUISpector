@@ -1,0 +1,366 @@
+{
+  "app_name": "Recipe Generator",
+  "context": "Personalized recipes generated from available fridge ingredients",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "The system shall allow users to add a new ingredient with optional quantity notes to the fridge inventory.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Given a non-empty ingredient name, clicking the add control inserts a new ingredient card at the top of the inventory list.",
+        "The ingredient card displays both the ingredient name and any optional quantity note entered.",
+        "Adding an ingredient does not require a page reload and the new ingredient becomes immediately actionable for other inventory features."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-002",
+      "description": "The system shall enable users to delete any existing ingredient from the inventory list.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Each ingredient card presents a remove action.",
+        "Activating the remove action deletes the ingredient from the visible list instantly.",
+        "Removed ingredients remain absent after a page refresh."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-003",
+      "description": "The system shall allow users to toggle each ingredient between 'In Fridge' and 'Out of Stock' states.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Each ingredient card includes an availability toggle between 'In Fridge' and 'Out of Stock'.",
+        "Changing the toggle updates the ingredient’s visual state immediately.",
+        "Recipe generation logic treats only ingredients marked 'In Fridge' as available inputs."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-004",
+      "description": "The system shall provide quick-add buttons for at least eight common ingredients.",
+      "status": "met",
+      "acceptance_criteria": [
+        "A quick-add panel lists no fewer than eight preset ingredients.",
+        "Clicking a preset ingredient instantly adds it to the inventory if it is not already present.",
+        "Subsequent clicks on the same preset update the existing ingredient entry instead of creating duplicates."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-005",
+      "description": "The system shall persist the fridge inventory using browser storage.",
+      "status": "met",
+      "acceptance_criteria": [
+        "On load, the system retrieves inventory data from browser storage and renders it.",
+        "Inventory changes are saved to browser storage immediately after each mutation.",
+        "Refreshing or reopening the app restores the latest inventory state."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-006",
+      "description": "The system shall generate a list of recipe suggestions prioritized by alignment with available ingredients.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Pressing the 'Find Recipes' control evaluates current inventory against the recipe dataset.",
+        "Recipes using only available ingredients appear before recipes requiring substitutions.",
+        "Each recipe suggestion displays counts of matching and missing ingredients."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-007",
+      "description": "The system shall display missing ingredients for every recipe suggestion.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Recipe cards list all ingredients required for the dish.",
+        "Ingredients not present in the current inventory are grouped under a 'Missing' label.",
+        "Missing ingredient lists update immediately when inventory availability changes."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-008",
+      "description": "The system shall present a recipe detail view with full instructions when a recipe is selected.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Selecting a recipe card opens a detail view via overlay or dedicated panel.",
+        "The detail view includes step-by-step instructions in sequential order.",
+        "Closing the detail view returns to the prior list without losing state."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-009",
+      "description": "The system shall allow users to filter recipes by meal type categories.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Meal type filter options such as Breakfast, Lunch, Dinner, and Snack are visible above the recipe list.",
+        "Selecting one or more meal types limits the visible recipes to the chosen categories.",
+        "Clearing the selection restores the full recipe list."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-010",
+      "description": "The system shall support keyword search across recipe names and tags.",
+      "status": "met",
+      "acceptance_criteria": [
+        "A keyword search input is available adjacent to the recipe list.",
+        "Entering text filters recipes in real time by matching name or associated keywords.",
+        "Clearing the search field restores the original recipe ordering."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-011",
+      "description": "The system shall allow users to favorite recipes and review them in a dedicated view.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Each recipe card contains a favorite toggle control.",
+        "Favorited recipes persist in browser storage across sessions.",
+        "A favorites view displays only favorited recipes and updates when toggles change."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-012",
+      "description": "The system shall enable users to mark ingredients with a 'Use Soon' flag for prioritization.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Ingredient cards provide a 'Use Soon' control.",
+        "Activating the control highlights the ingredient with a distinct visual style.",
+        "The 'Use Soon' state is saved and restored via browser storage."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-013",
+      "description": "The system shall display summary counters of tracked ingredients by availability state.",
+      "status": "met",
+      "acceptance_criteria": [
+        "A dashboard element shows the total number of tracked ingredients.",
+        "The summary includes counts for ingredients marked 'In Fridge' and 'Out of Stock'.",
+        "Counters update immediately after any inventory modification."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-014",
+      "description": "The system shall allow users to edit ingredient names and quantity notes inline.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Ingredient cards offer an edit action that reveals editable fields.",
+        "Saving edits updates the ingredient name and quantity within the list.",
+        "Edited values persist after the page is reloaded."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-015",
+      "description": "The system shall let users sort the ingredient list by recency or alphabetically.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Sorting controls for 'Most Recent' and 'Alphabetical' are available in the inventory section.",
+        "Selecting a sort option rearranges the ingredient cards immediately.",
+        "The chosen sort order remains active until the user selects a different option."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-016",
+      "description": "The system shall provide a 'Surprise Me' feature that opens a random recipe from the current list.",
+      "status": "met",
+      "acceptance_criteria": [
+        "A 'Surprise Me' button is accessible within the recipe toolbar.",
+        "Activating the button selects a random recipe from the currently filtered set.",
+        "The selected recipe’s detail view opens automatically upon selection."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-017",
+      "description": "The system shall allow users to create, save, and manage custom recipes.",
+      "status": "met",
+      "acceptance_criteria": [
+        "A custom recipe form collects name, meal type, selected ingredients, and instructions.",
+        "Saved custom recipes are stored in browser storage and appear alongside built-in recipes.",
+        "Custom recipes support filtering, searching, and favoriting like standard recipes."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-018",
+      "description": "The system shall offer substitution suggestions for missing ingredients from a predefined mapping.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Recipe detail views display substitution suggestions for each missing ingredient.",
+        "Selecting a substitution updates the ingredient list display accordingly.",
+        "Chosen substitutions remain applied for the recipe during the current session."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-019",
+      "description": "The system shall allow users to schedule generated recipes across a seven-day meal planner.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "A meal planner view presents seven consecutive days with separate meal slots.",
+        "Users can assign any recipe to a specific day and meal slot.",
+        "Assigned meals persist in browser storage and can be cleared per slot."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-020",
+      "description": "The system shall let users adjust recipe servings and automatically scale ingredient quantities.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Recipe detail views include a servings selector ranging from one to eight servings.",
+        "Changing the servings value recalculates each ingredient quantity proportionally.",
+        "Servings selections persist for each recipe during the active session."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-021",
+      "description": "The system shall track ingredient expiration dates and signal upcoming expirations.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Ingredient edit forms allow entry of an optional expiration date.",
+        "Inventory listings display days remaining for ingredients with expiration dates.",
+        "Ingredients expiring within three days show a prominent warning badge."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-022",
+      "description": "The system shall build a consolidated shopping list from missing ingredients of selected recipes.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Users can add recipes to a shopping list queue from recipe cards or detail views.",
+        "The system aggregates missing ingredients from all queued recipes without duplication.",
+        "The shopping list allows marking items as acquired while persisting the status."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-023",
+      "description": "The system shall support drag-and-drop reordering of ingredients into a custom sequence.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Ingredient cards expose a drag handle for initiating reordering.",
+        "Dropping an ingredient in a new position updates the displayed order immediately.",
+        "The custom order persists via browser storage across sessions."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-024",
+      "description": "The system shall deliver a guided cooking mode with interactive timers for timed steps.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Recipe detail views provide a guided mode that displays one instruction step at a time.",
+        "Steps containing durations include a startable countdown timer.",
+        "Completing a step automatically advances to the next instruction in guided mode."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-025",
+      "description": "The system shall allow users to export the current inventory to a downloadable JSON file.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "An 'Export Inventory' action is available within the inventory menu.",
+        "Triggering export generates a JSON file representing the inventory state.",
+        "The downloaded file name includes the current date stamp."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-026",
+      "description": "The system shall allow users to import ingredients from a JSON file.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "An 'Import Inventory' action is accessible from the inventory menu.",
+        "Selecting a valid JSON file replaces the existing inventory with imported entries.",
+        "The system validates file structure and notifies the user of import success."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-027",
+      "description": "The system shall enable users to rate recipes on a five-star scale.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Recipe detail views display a five-star rating component.",
+        "Users can submit a rating for each recipe within the current browser session.",
+        "Recipe cards show the average rating and update after new submissions."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-028",
+      "description": "The system shall allow creation and application of custom dietary filter tags.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Users can define custom dietary filters through a filter management interface.",
+        "Recipes can be tagged with any created dietary filter.",
+        "Selecting a dietary filter restricts the recipe list to matching tags."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-029",
+      "description": "The system shall permit users to attach photos to custom recipes.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "The custom recipe form accepts an optional local photo upload.",
+        "Uploaded photos display on the recipe card and detail view.",
+        "Photo data is stored in browser storage to persist across sessions."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-030",
+      "description": "The system shall generate a grocery pickup list organized by aisle categories.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "The shopping list view includes predefined aisle categories such as Produce, Dairy, and Pantry.",
+        "Missing ingredients automatically map to aisle categories in the pickup list.",
+        "Users can reorder aisle sections to match their store layout."
+      ],
+      "category": "functional",
+      "priority": "low"
+    }
+  ]
+}

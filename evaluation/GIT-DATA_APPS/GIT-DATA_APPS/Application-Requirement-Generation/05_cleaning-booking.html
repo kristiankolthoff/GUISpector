@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Home Cleaning Booking</title>
+<style>
+:root {
+  --brand: #2c74ff;
+  --brand-dark: #1d4fd7;
+  --accent: #53c7b5;
+  --accent-soft: #e0f6f2;
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --text: #1c2533;
+  --muted: #5a6472;
+  --border: #e2e6ef;
+  --shadow: 0 15px 40px rgba(18, 38, 63, 0.12);
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --danger: #f16063;
+  --warning: #ffae3d;
+  --success: #3bb273;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.07);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--brand-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand span {
+  display: inline-block;
+  padding: 6px 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+nav {
+  display: flex;
+  gap: 12px;
+}
+nav button {
+  background: transparent;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+nav button.active, nav button:hover {
+  background: rgba(44, 116, 255, 0.12);
+  color: var(--brand);
+}
+main {
+  flex: 1;
+}
+.section {
+  display: none;
+  padding: 48px 32px 64px;
+}
+.section.active {
+  display: block;
+}
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.hero {
+  background: linear-gradient(120deg, rgba(44, 116, 255, 0.12), rgba(83, 199, 181, 0.15));
+  padding: 72px 64px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: center;
+}
+.hero h1 {
+  font-size: 2.6rem;
+  margin: 0 0 16px;
+  line-height: 1.2;
+  color: var(--brand-dark);
+}
+.hero p {
+  margin: 0 0 32px;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+.primary {
+  background: var(--brand);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 10px 25px rgba(44,116,255,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(44,116,255,0.3);
+}
+.secondary {
+  background: rgba(44,116,255,0.08);
+  border: none;
+  padding: 12px 22px;
+  border-radius: 999px;
+  color: var(--brand-dark);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.secondary:hover {
+  background: rgba(44,116,255,0.15);
+}
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+.metric-card {
+  background: white;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(18, 38, 63, 0.06);
+}
+.metric-card h3 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: var(--brand-dark);
+}
+.metric-card span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.features-grid {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.feature-card {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 15px 40px rgba(18, 38, 63, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(44,116,255,0.08);
+}
+.feature-card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--brand-dark);
+}
+.feature-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.wizard {
+  max-width: 1040px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.wizard-header h2 {
+  margin: 0;
+  color: var(--brand-dark);
+  font-size: 1.8rem;
+}
+.wizard-header p {
+  color: var(--muted);
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+.wizard-steps {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  margin: 0 0 32px;
+  gap: 12px;
+}
+.wizard-steps li {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding-bottom: 8px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.wizard-steps li::before {
+  content: attr(data-step-number);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--muted);
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  background: white;
+}
+.wizard-steps li.active::before {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: white;
+}
+.wizard-steps li.completed::before {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+.wizard-steps li::after {
+  content: "";
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  width: calc(100% + 12px);
+  height: 3px;
+  background: var(--border);
+  transform: translateX(-50%);
+  z-index: -1;
+}
+.wizard-steps li:last-child::after {
+  display: none;
+}
+.wizard-steps li.completed::after {
+  background: var(--accent);
+}
+.step-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+.step-panel {
+  display: none;
+}
+.step-panel.active {
+  display: block;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.service-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  background: #f9fbff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.service-card h4 {
+  margin: 0 0 8px;
+  color: var(--brand-dark);
+}
+.service-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+.service-card .price-tag {
+  margin-top: 16px;
+  display: inline-flex;
+  padding: 8px 14px;
+  background: rgba(44,116,255,0.12);
+  color: var(--brand-dark);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.service-card.selected {
+  border-color: var(--brand);
+  background: white;
+  box-shadow: 0 12px 30px rgba(44,116,255,0.15);
+}
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.duration-option {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fbfcff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.duration-option input {
+  display: none;
+}
+.duration-option span {
+  font-weight: 600;
+  color: var(--text);
+}
+.duration-option small {
+  color: var(--muted);
+}
+.duration-option.selected {
+  border-color: var(--brand);
+  background: white;
+  box-shadow: 0 10px 26px rgba(44,116,255,0.12);
+}
+.addon-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.addon-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  background: #fbfcff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+.addon-item input {
+  width: 18px;
+  height: 18px;
+}
+.addon-item label {
+  flex: 1;
+  cursor: pointer;
+}
+.addon-item h5 {
+  margin: 0 0 4px;
+  font-size: 0.97rem;
+  color: var(--text);
+}
+.addon-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.addon-item.selected {
+  border-color: var(--accent);
+  background: white;
+  box-shadow: 0 10px 26px rgba(83,199,181,0.18);
+}
+.promo-area {
+  margin-top: 28px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  background: #f9fbff;
+}
+.promo-area form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.promo-area input {
+  flex: 1;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  background: white;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(44,116,255,0.12);
+}
+.promo-helper {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.promo-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.promo-tag {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(44,116,255,0.12);
+  color: var(--brand-dark);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+.slot-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.slot {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: #f8faff;
+  text-align: center;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+.slot.selected {
+  border-color: var(--brand);
+  background: white;
+  color: var(--brand-dark);
+  box-shadow: 0 10px 26px rgba(44,116,255,0.12);
+}
+.schedule-note {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.grid {
+  display: grid;
+  gap: 24px;
+}
+.grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-field label {
+  font-weight: 600;
+  color: var(--text);
+}
+.error-message {
+  min-height: 18px;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+.review-summary {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.summary-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  background: #f9fbff;
+}
+.summary-section h4 {
+  margin: 0 0 10px;
+  color: var(--brand-dark);
+}
+.summary-section p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.summary-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+.large {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.05rem;
+}
+.wizard-footer {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.wizard-footer .secondary {
+  padding: 12px 20px;
+}
+.price-area {
+  margin-left: auto;
+  min-width: 240px;
+  border-radius: var(--radius-md);
+  padding: 18px;
+  background: #f8faff;
+  border: 1px solid rgba(44,116,255,0.08);
+}
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+.price-row.total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-dark);
+  margin-top: 6px;
+}
+.price-area strong {
+  font-weight: 700;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 20, 30, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  z-index: 50;
+}
+.overlay.hidden {
+  display: none;
+}
+.overlay-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  max-width: 540px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 25px 60px rgba(18, 38, 63, 0.22);
+}
+.overlay-content.wide {
+  max-width: 720px;
+}
+.close-overlay {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(44,116,255,0.08);
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 1.3rem;
+  color: var(--brand-dark);
+  cursor: pointer;
+}
+.overlay-content h2 {
+  margin-top: 0;
+  color: var(--brand-dark);
+}
+.confirmation-summary {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.share-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.confirmation-actions {
+  margin-top: 26px;
+  text-align: right;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+.section-header h2 {
+  margin: 0;
+  color: var(--brand-dark);
+}
+.section-header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.filter-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: white;
+  color: var(--muted);
+  font-weight: 600;
+}
+.filter-btn.active {
+  background: rgba(44,116,255,0.12);
+  border-color: rgba(44,116,255,0.2);
+  color: var(--brand);
+}
+.booking-list {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 40px;
+}
+.booking-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgba(18, 38, 63, 0.08);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+}
+.booking-main h4 {
+  margin: 0 0 8px;
+  color: var(--brand-dark);
+}
+.booking-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.status-pill {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.status-pending {
+  background: rgba(44,116,255,0.12);
+  color: var(--brand-dark);
+}
+.status-completed {
+  background: rgba(59,178,115,0.15);
+  color: var(--success);
+}
+.status-cancelled {
+  background: rgba(241,96,99,0.12);
+  color: var(--danger);
+}
+.booking-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.booking-actions button {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: rgba(44,116,255,0.08);
+  color: var(--brand-dark);
+  transition: all 0.2s ease;
+}
+.booking-actions button:hover {
+  background: rgba(44,116,255,0.14);
+}
+.booking-actions button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.calendar-wrapper {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.calendar-wrapper h3 {
+  margin-top: 0;
+  color: var(--brand-dark);
+}
+.calendar-wrapper p {
+  margin-top: 4px;
+  margin-bottom: 18px;
+  color: var(--muted);
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+}
+.calendar-column {
+  background: #f9fbff;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  border: 1px solid var(--border);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.calendar-day {
+  font-weight: 700;
+  color: var(--brand-dark);
+  font-size: 0.95rem;
+}
+.calendar-date {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.calendar-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.calendar-booking {
+  background: white;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  border: 1px solid rgba(44,116,255,0.2);
+  font-size: 0.85rem;
+  color: var(--brand-dark);
+  box-shadow: 0 10px 20px rgba(44,116,255,0.12);
+}
+.profile-layout {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.profile-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.profile-card h2 {
+  margin-top: 0;
+  color: var(--brand-dark);
+}
+.profile-card form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.profile-card form button {
+  grid-column: span 2;
+  justify-self: flex-start;
+}
+.saved-addresses {
+  display: grid;
+  gap: 12px;
+}
+.address-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: #f9fbff;
+}
+.address-card h5 {
+  margin: 0 0 6px;
+  color: var(--brand-dark);
+}
+.address-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.coming-note {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: rgba(44,116,255,0.08);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+}
+.contact-card {
+  max-width: 560px;
+  margin: 0 auto;
+  background: white;
+  padding: 36px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.contact-card form {
+  display: grid;
+  gap: 18px;
+}
+.form-feedback {
+  margin: 0;
+  min-height: 24px;
+  font-size: 0.9rem;
+}
+.form-feedback.success {
+  color: var(--success);
+}
+.form-feedback.error {
+  color: var(--danger);
+}
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.detail-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  background: #f9fbff;
+}
+.detail-block h4 {
+  margin: 0 0 8px;
+  color: var(--brand-dark);
+}
+.detail-block p, .detail-block ul {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+.detail-block ul {
+  padding-left: 18px;
+}
+.timeline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+.timeline-step {
+  flex: 1;
+  text-align: center;
+  padding: 12px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(44,116,255,0.08);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.timeline-step.current {
+  background: rgba(44,116,255,0.18);
+  color: var(--brand-dark);
+}
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: #1c2533;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 999px;
+  box-shadow: 0 15px 30px rgba(18, 38, 63, 0.3);
+  opacity: 0;
+  transition: all 0.35s ease;
+  z-index: 60;
+  font-weight: 500;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.success {
+  background: var(--success);
+}
+.toast.error {
+  background: var(--danger);
+}
+@media (max-width: 1000px) {
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .schedule-grid {
+    grid-template-columns: 1fr;
+  }
+  .slot-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid.two {
+    grid-template-columns: 1fr;
+  }
+  .booking-card {
+    grid-template-columns: 1fr;
+  }
+  .calendar-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  header .header-inner {
+    padding: 16px 20px;
+  }
+}
+@media (max-width: 640px) {
+  .section {
+    padding: 32px 16px 48px;
+  }
+  .wizard {
+    padding: 26px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .addon-list {
+    grid-template-columns: 1fr;
+  }
+  .slot-list {
+    grid-template-columns: 1fr;
+  }
+  .calendar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  nav {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .wizard-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wizard-footer .secondary {
+    order: 1;
+  }
+  .wizard-footer .primary {
+    width: 100%;
+  }
+  .price-area {
+    width: 100%;
+  }
+  .promo-area form {
+    flex-direction: column;
+  }
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="header-inner">
+    <div class="brand">Home Cleaning Booking<span>New</span></div>
+    <nav>
+      <button class="active" data-section="home">Home</button>
+      <button data-section="book">Book</button>
+      <button data-section="bookings">My Bookings</button>
+      <button data-section="profile">Profile</button>
+      <button data-section="contact">Contact</button>
+    </nav>
+  </div>
+</header>
+<main>
+  <section id="homeSection" class="section active">
+    <div class="section-inner">
+      <div class="hero">
+        <div>
+          <h1>Premium home cleaning designed around your schedule.</h1>
+          <p>Instantly reserve trusted cleaners, customize add-ons, and manage every appointment from a single dashboard. Transparent pricing, flexible scheduling, and delightful service every time.</p>
+          <button class="primary" id="bookNowButton">Book Now</button>
+          <div class="hero-metrics">
+            <div class="metric-card">
+              <h3>12k+</h3>
+              <span>Homes refreshed</span>
+            </div>
+            <div class="metric-card">
+              <h3>4.9★</h3>
+              <span>Average customer rating</span>
+            </div>
+            <div class="metric-card">
+              <h3>48hr</h3>
+              <span>Availability window</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <img src="" alt="" style="display:none;">
+          <div class="feature-card">
+            <h3>Why households choose us</h3>
+            <p>• Flexible durations tailored to your space<br>• Instant price updates for add-ons<br>• Transparent scheduling with real-time availability</p>
+          </div>
+        </div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Trusted professionals</h3>
+          <p>Background-checked teams with consistent five-star reviews ensure your home shines with every visit.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Tailored service</h3>
+          <p>Select your cleaning style, add premium extras, and save favorite addresses for quicker bookings.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Manage in minutes</h3>
+          <p>Track upcoming visits, update details, and duplicate past appointments in just a few taps.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="bookingSection" class="section">
+    <div class="wizard">
+      <div class="wizard-header">
+        <h2>Plan your next cleaning</h2>
+        <p>Complete the steps below to finalize your appointment.</p>
+      </div>
+      <ol class="wizard-steps">
+        <li data-step-number="1" data-step="0">Service</li>
+        <li data-step-number="2" data-step="1">Plan</li>
+        <li data-step-number="3" data-step="2">Schedule</li>
+        <li data-step-number="4" data-step="3">Contact</li>
+        <li data-step-number="5" data-step="4">Review</li>
+      </ol>
+      <div class="step-panels">
+        <div class="step-panel" data-step="0">
+          <h3>Select a cleaning style</h3>
+          <p class="promo-helper">Choose the service that best matches your home today.</p>
+          <div class="cards" id="serviceCards"></div>
+        </div>
+
+        <div class="step-panel" data-step="1">
+          <h3>Customize your plan</h3>
+          <div class="grid two">
+            <div>
+              <h4>Duration</h4>
+              <div class="option-list" id="durationOptions"></div>
+            </div>
+            <div>
+              <h4>Add-ons</h4>
+              <div class="addon-list" id="addonList"></div>
+            </div>
+          </div>
+          <div class="promo-area">
+            <h4>Promotions</h4>
+            <form id="promoForm">
+              <input type="text" id="promoInput" placeholder="Enter promo code">
+              <button type="submit" class="secondary">Apply</button>
+            </form>
+            <p class="promo-helper">You can combine promo codes for extra savings.</p>
+            <div id="promoSummary" class="promo-tags"></div>
+          </div>
+        </div>
+
+        <div class="step-panel" data-step="2">
+          <h3>Select date & time</h3>
+          <div class="schedule-grid">
+            <div class="form-field">
+              <label for="dateInput">Preferred date</label>
+              <input type="date" id="dateInput">
+            </div>
+            <div>
+              <p class="promo-helper">Available time slots</p>
+              <div id="timeSlots" class="slot-list"></div>
+            </div>
+          </div>
+          <div class="schedule-note" id="scheduleSummary">No time selected yet.</div>
+        </div>
+
+        <div class="step-panel" data-step="3">
+          <h3>Contact & address</h3>
+          <div class="grid two">
+            <div class="form-block">
+              <div class="form-field">
+                <label for="contactName">Full name</label>
+                <input type="text" id="contactName" autocomplete="name">
+                <small class="error-message" data-error-for="contactName"></small>
+              </div>
+              <div class="form-field">
+                <label for="contactEmail">Email</label>
+                <input type="email" id="contactEmail" autocomplete="email">
+                <small class="error-message" data-error-for="contactEmail"></small>
+              </div>
+              <div class="form-field">
+                <label for="contactPhone">Phone</label>
+                <input type="tel" id="contactPhone" autocomplete="tel">
+                <small class="error-message" data-error-for="contactPhone"></small>
+              </div>
+            </div>
+            <div class="form-block">
+              <div class="form-field">
+                <label for="savedAddressSelect">Saved addresses</label>
+                <select id="savedAddressSelect">
+                  <option value="">Choose saved address</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="addressStreet">Street address</label>
+                <input type="text" id="addressStreet" autocomplete="street-address">
+                <small class="error-message" data-error-for="addressStreet"></small>
+              </div>
+              <div class="form-field">
+                <label for="addressUnit">Apartment / Unit (optional)</label>
+                <input type="text" id="addressUnit" autocomplete="address-line2">
+              </div>
+              <div class="form-field">
+                <label for="addressZip">ZIP code</label>
+                <input type="text" id="addressZip" autocomplete="postal-code">
+                <small class="error-message" data-error-for="addressZip"></small>
+              </div>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="instructions">Instructions for your cleaners (optional)</label>
+            <textarea id="instructions" placeholder="Parking details, door codes, pet notes..."></textarea>
+          </div>
+        </div>
+
+        <div class="step-panel" data-step="4">
+          <h3>Review & confirm</h3>
+          <div class="review-summary">
+            <div class="summary-section">
+              <h4>Service overview</h4>
+              <p id="reviewService"></p>
+            </div>
+            <div class="summary-grid">
+              <div class="summary-section">
+                <h4>Schedule</h4>
+                <p id="reviewSchedule"></p>
+              </div>
+              <div class="summary-section">
+                <h4>Contact</h4>
+                <p id="reviewContact"></p>
+              </div>
+            </div>
+            <div class="summary-section">
+              <h4>Add-ons</h4>
+              <ul id="reviewAddOns" class="summary-list"></ul>
+            </div>
+            <div class="summary-section">
+              <h4>Address & notes</h4>
+              <p id="reviewAddress"></p>
+            </div>
+            <div class="summary-section">
+              <h4>Pricing</h4>
+              <p id="reviewPricing"></p>
+            </div>
+          </div>
+          <button class="primary large" id="confirmBookingButton">Confirm booking</button>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="secondary" id="prevStepBtn">Back</button>
+        <div class="price-area">
+          <div class="price-row"><span>Service & plan</span><strong id="priceSubtotal">$0.00</strong></div>
+          <div class="price-row"><span>Promotions</span><strong id="priceDiscounts">-$0.00</strong></div>
+          <div class="price-row total"><span>Estimated total</span><strong id="priceTotal">$0.00</strong></div>
+        </div>
+        <button class="primary" id="nextStepBtn">Next Step</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="confirmationOverlay" class="overlay hidden">
+    <div class="overlay-content">
+      <button class="close-overlay" id="closeConfirmation">×</button>
+      <h2>You're booked!</h2>
+      <p>Your reference number is <strong id="confirmationReference"></strong></p>
+      <div id="confirmationSummary" class="confirmation-summary"></div>
+      <div class="share-actions">
+        <a id="shareEmail" class="secondary" href="#" target="_blank">Share via Email</a>
+        <button id="shareMessage" class="secondary" type="button">Share via Messaging</button>
+      </div>
+      <div class="confirmation-actions">
+        <button class="primary" id="goToBookings">Go to My Bookings</button>
+      </div>
+    </div>
+  </div>
+
+  <section id="bookingsSection" class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <div>
+          <h2>My Bookings</h2>
+          <p>Manage upcoming and past appointments.</p>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="All">All</button>
+        <button class="filter-btn" data-filter="Pending">Pending</button>
+        <button class="filter-btn" data-filter="Completed">Completed</button>
+        <button class="filter-btn" data-filter="Cancelled">Cancelled</button>
+      </div>
+      <div id="bookingList" class="booking-list"></div>
+      <div class="calendar-wrapper">
+        <h3>Weekly overview</h3>
+        <p>Drag a booked slot toward another day to preview future rescheduling.</p>
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="profileSection" class="section">
+    <div class="profile-layout">
+      <div class="profile-card">
+        <h2>Profile & Saved Addresses</h2>
+        <p class="promo-helper">Save frequently used addresses to speed up checkout.</p>
+        <form id="addressForm">
+          <div class="form-field">
+            <label for="addressLabel">Address nickname</label>
+            <input type="text" id="addressLabel" placeholder="e.g. Home, Office">
+          </div>
+          <div class="form-field">
+            <label for="profileStreet">Street address</label>
+            <input type="text" id="profileStreet" required>
+          </div>
+          <div class="form-field">
+            <label for="profileUnit">Apartment / Unit</label>
+            <input type="text" id="profileUnit">
+          </div>
+          <div class="form-field">
+            <label for="profileZip">ZIP code</label>
+            <input type="text" id="profileZip" required>
+          </div>
+          <button type="submit" class="primary">Save address</button>
+        </form>
+        <div id="savedAddresses" class="saved-addresses"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contactSection" class="section">
+    <div class="contact-card">
+      <h2>Get in touch</h2>
+      <p class="promo-helper">Have a question about our services? Drop us a note and our concierge team will respond shortly.</p>
+      <form id="contactForm">
+        <div class="form-field">
+          <label for="contactFormName">Name</label>
+          <input type="text" id="contactFormName" required>
+        </div>
+        <div class="form-field">
+          <label for="contactFormEmail">Email</label>
+          <input type="email" id="contactFormEmail" required>
+        </div>
+        <div class="form-field">
+          <label for="contactFormSubject">Subject</label>
+          <input type="text" id="contactFormSubject" required>
+        </div>
+        <div class="form-field">
+          <label for="contactFormMessage">Message</label>
+          <textarea id="contactFormMessage" required></textarea>
+        </div>
+        <button type="submit" class="primary">Send message</button>
+        <p id="contactFeedback" class="form-feedback"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="detailsOverlay" class="overlay hidden">
+    <div class="overlay-content wide">
+      <button class="close-overlay" id="closeDetails">×</button>
+      <h2>Booking details</h2>
+      <div id="detailsContent"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</main>
+</div>
+<script>
+(function() {
+  const SERVICE_CATEGORIES = [
+    {
+      id: 'standard',
+      name: 'Standard Clean',
+      description: 'Routine upkeep for kitchens, bathrooms, bedrooms, and living spaces.',
+      basePrice: 95
+    },
+    {
+      id: 'deep',
+      name: 'Deep Clean',
+      description: 'Detailed scrubbing with extra attention on grout, appliances, and baseboards.',
+      basePrice: 145
+    },
+    {
+      id: 'move',
+      name: 'Move In/Out',
+      description: 'Top-to-bottom cleaning for empty homes before move-in or after move-out.',
+      basePrice: 185
+    }
+  ];
+  const DURATIONS = [
+    { id: '2h', label: '2 Hours', description: 'Apartments & studios', multiplier: 1 },
+    { id: '3h', label: '3 Hours', description: 'Up to 2 bedrooms', multiplier: 1.35 },
+    { id: '4h', label: '4 Hours', description: 'Family homes', multiplier: 1.65 }
+  ];
+  const ADDONS = [
+    { id: 'fridge', name: 'Inside Fridge', description: 'Deep clean shelves and drawers', price: 25 },
+    { id: 'oven', name: 'Oven Detailing', description: 'Degrease racks and interior', price: 35 },
+    { id: 'laundry', name: 'Laundry Folding', description: 'Fold & organize up to 2 loads', price: 20 },
+    { id: 'windows', name: 'Window Shine', description: 'Interior glass cleaning', price: 30 }
+  ];
+  const PROMO_CODES = {
+    SAVE10: { type: 'percent', value: 10, label: 'Save 10% on your booking' },
+    FRESH20: { type: 'flat', value: 20, label: 'Instant $20 savings' },
+    EXTRA5: { type: 'percent', value: 5, label: 'Stackable 5% loyalty perk' }
+  };
+  const TIMELINE_STAGES = ['Requested', 'Confirmed', 'En Route', 'In Progress', 'Completed'];
+  const STORAGE_KEYS = {
+    bookings: 'HCB_BOOKINGS',
+    addresses: 'HCB_ADDRESSES'
+  };
+  const TIME_SLOTS = {
+    weekday: ['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM', '6:00 PM'],
+    weekend: ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM']
+  };
+  const AppState = {
+    step: 0,
+    bookingDraft: createEmptyDraft(),
+    editingReference: null
+  };
+  let bookings = [];
+  let savedAddresses = [];
+  let currentFilter = 'All';
+
+  const navButtons = document.querySelectorAll('nav button[data-section]');
+  const sections = {
+    home: document.getElementById('homeSection'),
+    book: document.getElementById('bookingSection'),
+    bookings: document.getElementById('bookingsSection'),
+    profile: document.getElementById('profileSection'),
+    contact: document.getElementById('contactSection')
+  };
+  const wizardStepsEl = document.querySelectorAll('.wizard-steps li');
+  const stepPanels = document.querySelectorAll('.step-panel');
+  const prevStepBtn = document.getElementById('prevStepBtn');
+  const nextStepBtn = document.getElementById('nextStepBtn');
+  const confirmBtn = document.getElementById('confirmBookingButton');
+  const priceSubtotalEl = document.getElementById('priceSubtotal');
+  const priceDiscountsEl = document.getElementById('priceDiscounts');
+  const priceTotalEl = document.getElementById('priceTotal');
+  const promoSummaryEl = document.getElementById('promoSummary');
+  const dateInput = document.getElementById('dateInput');
+  const timeSlotsContainer = document.getElementById('timeSlots');
+  const scheduleSummary = document.getElementById('scheduleSummary');
+  const reviewService = document.getElementById('reviewService');
+  const reviewSchedule = document.getElementById('reviewSchedule');
+  const reviewContact = document.getElementById('reviewContact');
+  const reviewAddOns = document.getElementById('reviewAddOns');
+  const reviewAddress = document.getElementById('reviewAddress');
+  const reviewPricing = document.getElementById('reviewPricing');
+  const confirmationOverlay = document.getElementById('confirmationOverlay');
+  const confirmationReference = document.getElementById('confirmationReference');
+  const confirmationSummary = document.getElementById('confirmationSummary');
+  const shareEmailLink = document.getElementById('shareEmail');
+  const toastEl = document.getElementById('toast');
+  const detailsOverlay = document.getElementById('detailsOverlay');
+  const detailsContent = document.getElementById('detailsContent');
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  function init() {
+    initNavigation();
+    initLanding();
+    renderServiceCards();
+    renderDurations();
+    renderAddOns();
+    initWizardControls();
+    initPromoForm();
+    initSchedule();
+    initContactFields();
+    initAddressForm();
+    initContactForm();
+    loadStorage();
+    renderSavedAddresses();
+    renderBookings();
+    renderCalendar();
+    updateWizardUI();
+  }
+
+  function createEmptyDraft() {
+    return {
+      serviceId: null,
+      durationId: null,
+      addOns: [],
+      promoCodes: [],
+      date: '',
+      timeSlot: '',
+      contact: {
+        name: '',
+        email: '',
+        phone: ''
+      },
+      address: {
+        label: '',
+        street: '',
+        unit: '',
+        zip: ''
+      },
+      instructions: ''
+    };
+  }
+
+  function initNavigation() {
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.section;
+        showSection(target);
+      });
+    });
+  }
+
+  function showSection(sectionKey) {
+    for (const key in sections) {
+      sections[key].classList.toggle('active', key === sectionKey);
+    }
+    navButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.section === sectionKey);
+    });
+    if (sectionKey === 'bookings') {
+      renderBookings();
+      renderCalendar();
+    }
+    if (sectionKey === 'profile') {
+      renderSavedAddresses();
+    }
+  }
+
+  function initLanding() {
+    document.getElementById('bookNowButton').addEventListener('click', () => {
+      startNewBooking();
+      showSection('book');
+    });
+  }
+
+  function renderServiceCards() {
+    const container = document.getElementById('serviceCards');
+    container.innerHTML = '';
+    SERVICE_CATEGORIES.forEach(service => {
+      const card = document.createElement('div');
+      card.className = 'service-card';
+      card.dataset.service = service.id;
+      card.innerHTML = `
+        <h4>${service.name}</h4>
+        <p>${service.description}</p>
+        <span class="price-tag">From $${service.basePrice.toFixed(0)}</span>
+      `;
+      card.addEventListener('click', () => {
+        AppState.bookingDraft.serviceId = service.id;
+        updateServiceSelectionUI();
+        updatePricingUI();
+      });
+      container.appendChild(card);
+    });
+  }
+
+  function updateServiceSelectionUI() {
+    document.querySelectorAll('.service-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.service === AppState.bookingDraft.serviceId);
+    });
+  }
+
+  function renderDurations() {
+    const container = document.getElementById('durationOptions');
+    container.innerHTML = '';
+    DURATIONS.forEach(duration => {
+      const option = document.createElement('label');
+      option.className = 'duration-option';
+      option.dataset.duration = duration.id;
+      option.innerHTML = `
+        <input type="radio" name="duration" value="${duration.id}">
+        <div>
+          <span>${duration.label}</span><br>
+          <small>${duration.description}</small>
+        </div>
+        <span>x${duration.multiplier}</span>
+      `;
+      option.addEventListener('click', () => {
+        AppState.bookingDraft.durationId = duration.id;
+        updateDurationSelectionUI();
+        updatePricingUI();
+      });
+      container.appendChild(option);
+    });
+  }
+
+  function updateDurationSelectionUI() {
+    document.querySelectorAll('.duration-option').forEach(option => {
+      option.classList.toggle('selected', option.dataset.duration === AppState.bookingDraft.durationId);
+    });
+  }
+
+  function renderAddOns() {
+    const container = document.getElementById('addonList');
+    container.innerHTML = '';
+    ADDONS.forEach(addOn => {
+      const wrapper = document.createElement('label');
+      wrapper.className = 'addon-item';
+      wrapper.dataset.addon = addOn.id;
+      wrapper.innerHTML = `
+        <input type="checkbox" value="${addOn.id}">
+        <label>
+          <h5>${addOn.name}</h5>
+          <p>+$${addOn.price.toFixed(0)}</p>
+        </label>
+      `;
+      wrapper.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        toggleAddOn(addOn.id);
+      });
+      wrapper.querySelector('input').addEventListener('change', (e) => {
+        e.stopPropagation();
+        toggleAddOn(addOn.id);
+      });
+      container.appendChild(wrapper);
+    });
+  }
+
+  function toggleAddOn(id) {
+    const current = AppState.bookingDraft.addOns;
+    if (current.includes(id)) {
+      AppState.bookingDraft.addOns = current.filter(item => item !== id);
+    } else {
+      AppState.bookingDraft.addOns.push(id);
+    }
+    updateAddOnSelectionUI();
+    updatePricingUI();
+  }
+
+  function updateAddOnSelectionUI() {
+    document.querySelectorAll('.addon-item').forEach(item => {
+      const addOnId = item.dataset.addon;
+      const selected = AppState.bookingDraft.addOns.includes(addOnId);
+      item.classList.toggle('selected', selected);
+      const checkbox = item.querySelector('input');
+      checkbox.checked = selected;
+    });
+  }
+
+  function initPromoForm() {
+    const promoForm = document.getElementById('promoForm');
+    const promoInput = document.getElementById('promoInput');
+    promoForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = promoInput.value.trim().toUpperCase();
+      if (!code) {
+        showToast('Enter a promo code to apply.', 'error');
+        return;
+      }
+      if (!PROMO_CODES[code]) {
+        showToast('Sorry, that promo code is not recognized.', 'error');
+        return;
+      }
+      if (AppState.bookingDraft.promoCodes.includes(code)) {
+        showToast('Promo code already applied.', 'error');
+        return;
+      }
+      AppState.bookingDraft.promoCodes.push(code);
+      promoInput.value = '';
+      showToast(`Promo ${code} applied!`, 'success');
+      updatePromoSummary();
+      updatePricingUI();
+    });
+    updatePromoSummary();
+  }
+
+  function updatePromoSummary() {
+    promoSummaryEl.innerHTML = '';
+    if (AppState.bookingDraft.promoCodes.length === 0) {
+      const empty = document.createElement('span');
+      empty.className = 'promo-helper';
+      empty.textContent = 'No promo codes applied yet.';
+      promoSummaryEl.appendChild(empty);
+      return;
+    }
+    AppState.bookingDraft.promoCodes.forEach(code => {
+      const tag = document.createElement('span');
+      tag.className = 'promo-tag';
+      tag.textContent = code;
+      promoSummaryEl.appendChild(tag);
+    });
+  }
+
+  function initSchedule() {
+    const todayISO = getTodayISO();
+    dateInput.min = todayISO;
+    dateInput.addEventListener('change', () => {
+      AppState.bookingDraft.date = dateInput.value;
+      AppState.bookingDraft.timeSlot = '';
+      renderTimeSlots();
+      updateScheduleSummary();
+    });
+    renderTimeSlots();
+  }
+
+  function getTodayISO() {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const local = new Date(today.getTime() - offset * 60000);
+    return local.toISOString().split('T')[0];
+  }
+
+  function renderTimeSlots() {
+    timeSlotsContainer.innerHTML = '';
+    if (!AppState.bookingDraft.date) {
+      const placeholder = document.createElement('p');
+      placeholder.className = 'promo-helper';
+      placeholder.textContent = 'Select a date to see available times.';
+      timeSlotsContainer.appendChild(placeholder);
+      return;
+    }
+    const date = new Date(AppState.bookingDraft.date + 'T00:00:00');
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const slots = isWeekend ? TIME_SLOTS.weekend : TIME_SLOTS.weekday;
+    slots.forEach(slot => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot';
+      btn.textContent = slot;
+      btn.dataset.slot = slot;
+      btn.addEventListener('click', () => {
+        AppState.bookingDraft.timeSlot = slot;
+        updateTimeSlotUI();
+        updateScheduleSummary();
+      });
+      timeSlotsContainer.appendChild(btn);
+    });
+    updateTimeSlotUI();
+  }
+
+  function updateTimeSlotUI() {
+    document.querySelectorAll('.slot').forEach(slot => {
+      slot.classList.toggle('selected', slot.dataset.slot === AppState.bookingDraft.timeSlot);
+    });
+  }
+
+  function updateScheduleSummary() {
+    if (AppState.bookingDraft.date && AppState.bookingDraft.timeSlot) {
+      const formattedDate = formatDate(AppState.bookingDraft.date);
+      scheduleSummary.textContent = `Scheduled for ${formattedDate} at ${AppState.bookingDraft.timeSlot}.`;
+    } else if (AppState.bookingDraft.date) {
+      const formattedDate = formatDate(AppState.bookingDraft.date);
+      scheduleSummary.textContent = `Selected date: ${formattedDate}. Choose a time slot to continue.`;
+    } else {
+      scheduleSummary.textContent = 'No time selected yet.';
+    }
+  }
+
+  function initContactFields() {
+    const fields = [
+      { id: 'contactName', key: 'name', type: 'contact' },
+      { id: 'contactEmail', key: 'email', type: 'contact' },
+      { id: 'contactPhone', key: 'phone', type: 'contact' },
+      { id: 'addressStreet', key: 'street', type: 'address' },
+      { id: 'addressUnit', key: 'unit', type: 'address' },
+      { id: 'addressZip', key: 'zip', type: 'address' }
+    ];
+    fields.forEach(field => {
+      const input = document.getElementById(field.id);
+      input.addEventListener('input', () => {
+        if (field.type === 'contact') {
+          AppState.bookingDraft.contact[field.key] = input.value;
+        } else {
+          AppState.bookingDraft.address[field.key] = input.value;
+        }
+        if (field.type === 'contact') {
+          clearFieldError(field.id);
+        } else if (field.key === 'street' || field.key === 'zip') {
+          clearFieldError(field.id);
+        }
+      });
+    });
+    document.getElementById('instructions').addEventListener('input', (e) => {
+      AppState.bookingDraft.instructions = e.target.value;
+    });
+    document.getElementById('savedAddressSelect').addEventListener('change', (e) => {
+      const id = e.target.value;
+      if (!id) return;
+      const saved = savedAddresses.find(addr => addr.id === id);
+      if (saved) {
+        AppState.bookingDraft.address.label = saved.label;
+        AppState.bookingDraft.address.street = saved.street;
+        AppState.bookingDraft.address.unit = saved.unit;
+        AppState.bookingDraft.address.zip = saved.zip;
+        document.getElementById('addressStreet').value = saved.street;
+        document.getElementById('addressUnit').value = saved.unit;
+        document.getElementById('addressZip').value = saved.zip;
+      }
+    });
+  }
+
+  function clearFieldError(fieldId) {
+    const errorEl = document.querySelector(`[data-error-for="${fieldId}"]`);
+    if (errorEl) {
+      errorEl.textContent = '';
+    }
+  }
+
+  function initWizardControls() {
+    prevStepBtn.addEventListener('click', () => {
+      if (AppState.step > 0) {
+        AppState.step -= 1;
+        updateWizardUI();
+      }
+    });
+    nextStepBtn.addEventListener('click', () => {
+      if (!validateCurrentStep()) return;
+      if (AppState.step < 4) {
+        AppState.step += 1;
+        updateWizardUI();
+      }
+    });
+    confirmBtn.addEventListener('click', () => {
+      if (!validateCurrentStep()) return;
+      finalizeBooking();
+    });
+    document.getElementById('closeConfirmation').addEventListener('click', () => {
+      confirmationOverlay.classList.add('hidden');
+    });
+    document.getElementById('goToBookings').addEventListener('click', () => {
+      confirmationOverlay.classList.add('hidden');
+      showSection('bookings');
+    });
+    document.getElementById('closeDetails').addEventListener('click', () => {
+      detailsOverlay.classList.add('hidden');
+    });
+    document.getElementById('shareMessage').addEventListener('click', () => {
+      showToast('Messaging share is coming soon.', 'info');
+    });
+  }
+
+  function updateWizardUI() {
+    wizardStepsEl.forEach(stepEl => {
+      const stepIndex = parseInt(stepEl.dataset.step, 10);
+      stepEl.classList.toggle('active', stepIndex === AppState.step);
+      stepEl.classList.toggle('completed', stepIndex < AppState.step);
+    });
+    stepPanels.forEach(panel => {
+      const stepIndex = parseInt(panel.dataset.step, 10);
+      panel.classList.toggle('active', stepIndex === AppState.step);
+    });
+    prevStepBtn.disabled = AppState.step === 0;
+    nextStepBtn.style.display = AppState.step === 4 ? 'none' : 'inline-flex';
+    confirmBtn.style.display = AppState.step === 4 ? 'inline-flex' : 'none';
+    if (AppState.step === 4) {
+      renderReview();
+    }
+    updateServiceSelectionUI();
+    updateDurationSelectionUI();
+    updateAddOnSelectionUI();
+    updatePromoSummary();
+    updateTimeSlotUI();
+    updatePricingUI();
+    updateScheduleSummary();
+    syncWizardFields();
+  }
+
+  function updatePricingUI() {
+    const pricing = calculatePricing(AppState.bookingDraft);
+    priceSubtotalEl.textContent = formatCurrency(pricing.subtotal);
+    priceDiscountsEl.textContent = `-${formatCurrency(pricing.totalDiscount)}`;
+    priceTotalEl.textContent = formatCurrency(pricing.total);
+  }
+
+  function calculatePricing(draft) {
+    const service = SERVICE_CATEGORIES.find(s => s.id === draft.serviceId);
+    const duration = DURATIONS.find(d => d.id === draft.durationId);
+    const base = service ? service.basePrice : 0;
+    const multiplier = duration ? duration.multiplier : 1;
+    const addOnTotal = draft.addOns.reduce((sum, id) => {
+      const addOn = ADDONS.find(item => item.id === id);
+      return sum + (addOn ? addOn.price : 0);
+    }, 0);
+    const subtotal = (base * multiplier) + addOnTotal;
+    let totalDiscount = 0;
+    draft.promoCodes.forEach(code => {
+      const rule = PROMO_CODES[code];
+      if (!rule) return;
+      if (rule.type === 'percent') {
+        totalDiscount += subtotal * (rule.value / 100);
+      } else if (rule.type === 'flat') {
+        totalDiscount += rule.value;
+      }
+    });
+    totalDiscount = Math.min(totalDiscount, subtotal);
+    const total = Math.max(subtotal - totalDiscount, 0);
+    return {
+      subtotal: roundCurrency(subtotal),
+      totalDiscount: roundCurrency(totalDiscount),
+      total: roundCurrency(total)
+    };
+  }
+
+  function roundCurrency(value) {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
+  function formatCurrency(value) {
+    return `$${value.toFixed(2)}`;
+  }
+
+  function validateCurrentStep() {
+    switch (AppState.step) {
+      case 0:
+        if (!AppState.bookingDraft.serviceId) {
+          showToast('Please select a cleaning service to continue.', 'error');
+          return false;
+        }
+        return true;
+      case 1:
+        if (!AppState.bookingDraft.durationId) {
+          showToast('Pick a duration that matches your home size.', 'error');
+          return false;
+        }
+        return true;
+      case 2:
+        if (!AppState.bookingDraft.date) {
+          showToast('Choose a preferred date for your cleaning.', 'error');
+          return false;
+        }
+        if (!AppState.bookingDraft.timeSlot) {
+          showToast('Select a time slot to continue.', 'error');
+          return false;
+        }
+        return true;
+      case 3:
+        return validateContactStep();
+      case 4:
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  function validateContactStep() {
+    let valid = true;
+    if (!AppState.bookingDraft.contact.name.trim()) {
+      setFieldError('contactName', 'Name is required.');
+      valid = false;
+    }
+    if (!validateEmail(AppState.bookingDraft.contact.email)) {
+      setFieldError('contactEmail', 'Enter a valid email.');
+      valid = false;
+    }
+    if (!AppState.bookingDraft.contact.phone.trim()) {
+      setFieldError('contactPhone', 'Phone number is required.');
+      valid = false;
+    }
+    if (!AppState.bookingDraft.address.street.trim()) {
+      setFieldError('addressStreet', 'Street address is required.');
+      valid = false;
+    }
+    if (!AppState.bookingDraft.address.zip.trim()) {
+      setFieldError('addressZip', 'ZIP code is required.');
+      valid = false;
+    }
+    if (!valid) {
+      showToast('Please complete the required fields.', 'error');
+    }
+    return valid;
+  }
+
+  function setFieldError(fieldId, message) {
+    const errorEl = document.querySelector(`[data-error-for="${fieldId}"]`);
+    if (errorEl) {
+      errorEl.textContent = message;
+    }
+  }
+
+  function validateEmail(email) {
+    if (!email) return false;
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
+  }
+
+  function renderReview() {
+    const service = SERVICE_CATEGORIES.find(s => s.id === AppState.bookingDraft.serviceId);
+    const duration = DURATIONS.find(d => d.id === AppState.bookingDraft.durationId);
+    const pricing = calculatePricing(AppState.bookingDraft);
+    reviewService.textContent = service && duration ? `${service.name} • ${duration.label}` : 'Not set';
+    reviewSchedule.textContent = AppState.bookingDraft.date && AppState.bookingDraft.timeSlot
+      ? `${formatDate(AppState.bookingDraft.date)}, ${AppState.bookingDraft.timeSlot}`
+      : 'Not set';
+    const contact = AppState.bookingDraft.contact;
+    reviewContact.textContent = `${contact.name || '—'} • ${contact.email || '—'} • ${contact.phone || '—'}`;
+    reviewAddOns.innerHTML = '';
+    if (AppState.bookingDraft.addOns.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'No add-ons selected.';
+      reviewAddOns.appendChild(li);
+    } else {
+      AppState.bookingDraft.addOns.forEach(id => {
+        const addOn = ADDONS.find(item => item.id === id);
+        const li = document.createElement('li');
+        li.textContent = addOn ? `${addOn.name} (+$${addOn.price.toFixed(0)})` : id;
+        reviewAddOns.appendChild(li);
+      });
+    }
+    const address = AppState.bookingDraft.address;
+    const addressLines = [
+      address.street || '',
+      address.unit ? `Unit ${address.unit}` : '',
+      address.zip ? `ZIP ${address.zip}` : ''
+    ].filter(Boolean).join(' • ');
+    const instructions = AppState.bookingDraft.instructions ? `<br>Notes: ${AppState.bookingDraft.instructions}` : '';
+    reviewAddress.innerHTML = `${addressLines || 'No address provided'}${instructions}`;
+    const promosApplied = AppState.bookingDraft.promoCodes.length;
+    const promoText = promosApplied > 0 ? `${promosApplied} promo code(s) applied.` : 'No promo codes applied.';
+    reviewPricing.innerHTML = `
+      Subtotal ${formatCurrency(pricing.subtotal)}<br>
+      Promotions ${promosApplied} – ${formatCurrency(pricing.totalDiscount)} saved<br>
+      <strong>Total ${formatCurrency(pricing.total)}</strong><br>
+      <span style="color:var(--muted);font-size:0.85rem;">${promoText}</span>
+    `;
+  }
+
+  function finalizeBooking() {
+    const pricing = calculatePricing(AppState.bookingDraft);
+    const service = SERVICE_CATEGORIES.find(s => s.id === AppState.bookingDraft.serviceId);
+    const duration = DURATIONS.find(d => d.id === AppState.bookingDraft.durationId);
+    if (!service || !duration) {
+      showToast('Please complete all required selections.', 'error');
+      return;
+    }
+    const newBooking = {
+      reference: AppState.editingReference ? AppState.editingReference : generateReference(),
+      serviceId: service.id,
+      serviceName: service.name,
+      durationId: duration.id,
+      durationLabel: duration.label,
+      addOns: AppState.bookingDraft.addOns.map(id => {
+        const addOn = ADDONS.find(item => item.id === id);
+        return addOn ? { id: addOn.id, name: addOn.name, price: addOn.price } : null;
+      }).filter(Boolean),
+      promoCodes: [...AppState.bookingDraft.promoCodes],
+      date: AppState.bookingDraft.date,
+      timeSlot: AppState.bookingDraft.timeSlot,
+      contact: { ...AppState.bookingDraft.contact },
+      address: { ...AppState.bookingDraft.address },
+      instructions: AppState.bookingDraft.instructions,
+      status: 'Pending',
+      createdAt: new Date().toISOString(),
+      price: pricing
+    };
+    if (AppState.editingReference) {
+      const index = bookings.findIndex(b => b.reference === AppState.editingReference);
+      if (index !== -1) {
+        const existing = bookings[index];
+        bookings[index] = {
+          ...existing,
+          ...newBooking,
+          reference: existing.reference,
+          status: existing.status,
+          createdAt: existing.createdAt,
+          updatedAt: new Date().toISOString()
+        };
+      }
+      showToast('Booking updated successfully.', 'success');
+    } else {
+      bookings.push(newBooking);
+      showToast('Booking confirmed! 🎉', 'success');
+    }
+    saveBookings();
+    renderBookings();
+    renderCalendar();
+    showConfirmation(newBooking);
+    AppState.bookingDraft = createEmptyDraft();
+    AppState.editingReference = null;
+    AppState.step = 0;
+    setContactFieldsDisabled(false);
+    updateWizardUI();
+  }
+
+  function generateReference() {
+    return `HCB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+  }
+
+  function showConfirmation(booking) {
+    confirmationReference.textContent = booking.reference;
+    const addOnsText = booking.addOns.length ? booking.addOns.map(a => a.name).join(', ') : 'No add-ons';
+    confirmationSummary.innerHTML = `
+      <div><strong>Service</strong>: ${booking.serviceName} • ${booking.durationLabel}</div>
+      <div><strong>Schedule</strong>: ${formatDate(booking.date)} at ${booking.timeSlot}</div>
+      <div><strong>Address</strong>: ${booking.address.street}${booking.address.unit ? ', ' + booking.address.unit : ''}, ${booking.address.zip}</div>
+      <div><strong>Add-ons</strong>: ${addOnsText}</div>
+      <div><strong>Total</strong>: ${formatCurrency(booking.price.total)}</div>
+    `;
+    shareEmailLink.href = buildShareEmailLink(booking);
+    confirmationOverlay.classList.remove('hidden');
+  }
+
+  function buildShareEmailLink(booking) {
+    const subject = encodeURIComponent(`Your Home Cleaning Booking ${booking.reference}`);
+    const body = encodeURIComponent(`Hi there,%0D%0A%0D%0AYour cleaning is confirmed!%0D%0A%0D%0AReference: ${booking.reference}%0D%0AService: ${booking.serviceName} (${booking.durationLabel})%0D%0ASchedule: ${formatDate(booking.date)} at ${booking.timeSlot}%0D%0ATotal: ${formatCurrency(booking.price.total)}%0D%0A%0D%0AWe look forward to refreshing your home!`);
+    return `mailto:?subject=${subject}&body=${body}`;
+  }
+
+  function loadStorage() {
+    const storedBookings = sessionStorage.getItem(STORAGE_KEYS.bookings);
+    if (storedBookings) {
+      try {
+        bookings = JSON.parse(storedBookings);
+      } catch (error) {
+        bookings = [];
+      }
+    }
+    const storedAddresses = sessionStorage.getItem(STORAGE_KEYS.addresses);
+    if (storedAddresses) {
+      try {
+        savedAddresses = JSON.parse(storedAddresses);
+      } catch (error) {
+        savedAddresses = [];
+      }
+    }
+  }
+
+  function saveBookings() {
+    sessionStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(bookings));
+  }
+
+  function saveAddresses() {
+    sessionStorage.setItem(STORAGE_KEYS.addresses, JSON.stringify(savedAddresses));
+  }
+
+  function renderBookings() {
+    const list = document.getElementById('bookingList');
+    list.innerHTML = '';
+    const filtered = bookings.filter(booking => {
+      if (currentFilter === 'All') return true;
+      return booking.status === currentFilter;
+    });
+    if (filtered.length === 0) {
+      const emptyState = document.createElement('div');
+      emptyState.className = 'feature-card';
+      emptyState.innerHTML = `<h3>No bookings to display</h3><p>Once you confirm a cleaning, it will appear here for easy management.</p>`;
+      list.appendChild(emptyState);
+      return;
+    }
+    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    filtered.forEach(booking => {
+      const card = document.createElement('div');
+      card.className = 'booking-card';
+      const statusClass = booking.status.toLowerCase();
+      card.innerHTML = `
+        <div class="booking-main">
+          <h4>${booking.serviceName} • ${booking.durationLabel}</h4>
+          <div class="booking-meta">
+            <span>${formatDate(booking.date)} at ${booking.timeSlot}</span>
+            <span>Ref ${booking.reference}</span>
+            <span>Total ${formatCurrency(booking.price.total)}</span>
+          </div>
+        </div>
+        <div>
+          <div class="status-pill status-${statusClass}">${booking.status}</div>
+        </div>
+        <div class="booking-actions">
+          <button type="button" data-action="details" data-ref="${booking.reference}">View Details</button>
+          <button type="button" data-action="edit" data-ref="${booking.reference}" ${booking.status !== 'Pending' ? 'disabled' : ''}>Edit</button>
+          <button type="button" data-action="duplicate" data-ref="${booking.reference}">Duplicate</button>
+          <button type="button" data-action="complete" data-ref="${booking.reference}" ${booking.status !== 'Pending' ? 'disabled' : ''}>Mark Complete</button>
+          <button type="button" data-action="cancel" data-ref="${booking.reference}" ${booking.status !== 'Pending' ? 'disabled' : ''}>Cancel</button>
+        </div>
+      `;
+      card.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => handleBookingAction(btn.dataset.action, btn.dataset.ref));
+      });
+      list.appendChild(card);
+    });
+    initFilterButtons();
+  }
+
+  function initFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderBookings();
+      });
+    });
+  }
+
+  function handleBookingAction(action, reference) {
+    switch (action) {
+      case 'cancel':
+        updateBookingStatus(reference, 'Cancelled');
+        break;
+      case 'complete':
+        updateBookingStatus(reference, 'Completed');
+        break;
+      case 'duplicate':
+        duplicateBooking(reference);
+        break;
+      case 'edit':
+        editBooking(reference);
+        break;
+      case 'details':
+        openBookingDetails(reference);
+        break;
+      default:
+        break;
+    }
+  }
+
+  function updateBookingStatus(reference, status) {
+    const booking = bookings.find(b => b.reference === reference);
+    if (!booking) return;
+    booking.status = status;
+    booking.updatedAt = new Date().toISOString();
+    saveBookings();
+    renderBookings();
+    renderCalendar();
+    showToast(`Booking marked as ${status}.`, 'info');
+  }
+
+  function duplicateBooking(reference) {
+    const booking = bookings.find(b => b.reference === reference);
+    if (!booking) return;
+    const draft = createEmptyDraft();
+    draft.serviceId = booking.serviceId;
+    draft.durationId = booking.durationId;
+    draft.addOns = booking.addOns.map(addOn => addOn.id);
+    draft.promoCodes = [...booking.promoCodes];
+    draft.date = booking.date;
+    draft.timeSlot = booking.timeSlot;
+    draft.contact = { ...booking.contact };
+    draft.address = { ...booking.address };
+    draft.instructions = booking.instructions;
+    AppState.bookingDraft = draft;
+    AppState.step = 0;
+    AppState.editingReference = null;
+    setContactFieldsDisabled(false);
+    updateWizardUI();
+    showSection('book');
+    showToast('Booking details duplicated. Review and confirm when ready.', 'success');
+  }
+
+  function editBooking(reference) {
+    const booking = bookings.find(b => b.reference === reference);
+    if (!booking) return;
+    const draft = createEmptyDraft();
+    draft.serviceId = booking.serviceId;
+    draft.durationId = booking.durationId;
+    draft.addOns = booking.addOns.map(addOn => addOn.id);
+    draft.promoCodes = [...booking.promoCodes];
+    draft.date = booking.date;
+    draft.timeSlot = booking.timeSlot;
+    draft.contact = { ...booking.contact };
+    draft.address = { ...booking.address };
+    draft.instructions = booking.instructions;
+    AppState.bookingDraft = draft;
+    AppState.step = 0;
+    AppState.editingReference = booking.reference;
+    setContactFieldsDisabled(true);
+    updateWizardUI();
+    showSection('book');
+    showToast('Editing booking details. Contact fields are locked for this edit.', 'info');
+  }
+
+  function setContactFieldsDisabled(disabled) {
+    const fields = ['contactName', 'contactEmail', 'contactPhone'];
+    fields.forEach(id => {
+      const input = document.getElementById(id);
+      input.disabled = disabled;
+      input.classList.toggle('readonly', disabled);
+    });
+  }
+
+  function syncWizardFields() {
+    document.getElementById('contactName').value = AppState.bookingDraft.contact.name;
+    document.getElementById('contactEmail').value = AppState.bookingDraft.contact.email;
+    document.getElementById('contactPhone').value = AppState.bookingDraft.contact.phone;
+    document.getElementById('addressStreet').value = AppState.bookingDraft.address.street;
+    document.getElementById('addressUnit').value = AppState.bookingDraft.address.unit;
+    document.getElementById('addressZip').value = AppState.bookingDraft.address.zip;
+    document.getElementById('instructions').value = AppState.bookingDraft.instructions;
+    dateInput.value = AppState.bookingDraft.date;
+    renderTimeSlots();
+  }
+
+  function renderCalendar() {
+    const container = document.getElementById('calendarGrid');
+    container.innerHTML = '';
+    const baseDate = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(baseDate);
+      date.setDate(baseDate.getDate() + i);
+      const iso = date.toISOString().split('T')[0];
+      const column = document.createElement('div');
+      column.className = 'calendar-column';
+      column.dataset.date = iso;
+      column.addEventListener('dragover', (e) => e.preventDefault());
+      column.addEventListener('drop', (e) => {
+        e.preventDefault();
+        showToast('Drag-and-drop rescheduling is coming soon.', 'info');
+      });
+      column.innerHTML = `
+        <div class="calendar-day">${date.toLocaleDateString(undefined, { weekday: 'short' })}</div>
+        <div class="calendar-date">${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
+        <div class="calendar-slot"></div>
+      `;
+      const slot = column.querySelector('.calendar-slot');
+      bookings.filter(b => b.date === iso).forEach(booking => {
+        const block = document.createElement('div');
+        block.className = 'calendar-booking';
+        block.draggable = true;
+        block.dataset.ref = booking.reference;
+        block.textContent = `${booking.timeSlot} • ${booking.serviceName}`;
+        block.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', booking.reference);
+        });
+        slot.appendChild(block);
+      });
+      container.appendChild(column);
+    }
+  }
+
+  function openBookingDetails(reference) {
+    const booking = bookings.find(b => b.reference === reference);
+    if (!booking) return;
+    const addOns = booking.addOns.length ? booking.addOns.map(a => `<li>${a.name} (+$${a.price.toFixed(0)})</li>`).join('') : '<li>No add-ons selected.</li>';
+    const promoText = booking.promoCodes.length ? booking.promoCodes.join(', ') : 'No promo codes applied.';
+    const timeline = TIMELINE_STAGES.map((stage, index) => `<div class="timeline-step ${index === 1 ? 'current' : ''}">${stage}</div>`).join('');
+    detailsContent.innerHTML = `
+      <div class="details-grid">
+        <div class="detail-block">
+          <h4>Service</h4>
+          <p>${booking.serviceName} • ${booking.durationLabel}</p>
+        </div>
+        <div class="detail-block">
+          <h4>Schedule</h4>
+          <p>${formatDate(booking.date)} at ${booking.timeSlot}</p>
+        </div>
+        <div class="detail-block">
+          <h4>Contact</h4>
+          <p>${booking.contact.name}<br>${booking.contact.email}<br>${booking.contact.phone}</p>
+        </div>
+        <div class="detail-block">
+          <h4>Address</h4>
+          <p>${booking.address.street}${booking.address.unit ? ', ' + booking.address.unit : ''}<br>${booking.address.zip}</p>
+        </div>
+        <div class="detail-block">
+          <h4>Add-ons</h4>
+          <ul>${addOns}</ul>
+        </div>
+        <div class="detail-block">
+          <h4>Pricing</h4>
+          <p>Subtotal: ${formatCurrency(booking.price.subtotal)}<br>Promotions: -${formatCurrency(booking.price.totalDiscount)}<br><strong>Total: ${formatCurrency(booking.price.total)}</strong><br><small>Promo codes: ${promoText}</small></p>
+        </div>
+      </div>
+      <div class="detail-block" style="margin-top:18px;">
+        <h4>Instructions</h4>
+        <p>${booking.instructions ? booking.instructions : 'No special instructions provided.'}</p>
+      </div>
+      <div class="timeline">${timeline}</div>
+    `;
+    detailsOverlay.classList.remove('hidden');
+  }
+
+  function formatDate(isoDate) {
+    if (!isoDate) return '';
+    const date = new Date(isoDate + 'T00:00:00');
+    return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function startNewBooking(prefill) {
+    AppState.bookingDraft = prefill ? { ...prefill } : createEmptyDraft();
+    AppState.step = 0;
+    AppState.editingReference = null;
+    setContactFieldsDisabled(false);
+    updateWizardUI();
+  }
+
+  function initAddressForm() {
+    const form = document.getElementById('addressForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const label = document.getElementById('addressLabel').value.trim() || 'Saved address';
+      const street = document.getElementById('profileStreet').value.trim();
+      const unit = document.getElementById('profileUnit').value.trim();
+      const zip = document.getElementById('profileZip').value.trim();
+      if (!street || !zip) {
+        showToast('Street and ZIP are required to save an address.', 'error');
+        return;
+      }
+      const address = {
+        id: `addr-${Date.now()}`,
+        label,
+        street,
+        unit,
+        zip
+      };
+      savedAddresses.push(address);
+      saveAddresses();
+      renderSavedAddresses();
+      form.reset();
+      showToast('Address saved for future bookings.', 'success');
+    });
+  }
+
+  function renderSavedAddresses() {
+    const container = document.getElementById('savedAddresses');
+    container.innerHTML = '';
+    if (savedAddresses.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'promo-helper';
+      empty.textContent = 'No saved addresses yet.';
+      container.appendChild(empty);
+    } else {
+      savedAddresses.forEach(addr => {
+        const card = document.createElement('div');
+        card.className = 'address-card';
+        card.innerHTML = `
+          <h5>${addr.label}</h5>
+          <p>${addr.street}${addr.unit ? ', ' + addr.unit : ''}<br>${addr.zip}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+    const select = document.getElementById('savedAddressSelect');
+    select.innerHTML = '<option value="">Choose saved address</option>';
+    savedAddresses.forEach(addr => {
+      const option = document.createElement('option');
+      option.value = addr.id;
+      option.textContent = `${addr.label} – ${addr.street}`;
+      select.appendChild(option);
+    });
+  }
+
+  function initContactForm() {
+    const form = document.getElementById('contactForm');
+    const feedback = document.getElementById('contactFeedback');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      feedback.textContent = 'Your message has been sent. We will reply shortly.';
+      feedback.className = 'form-feedback success';
+      form.reset();
+    });
+  }
+
+  function showToast(message, type = 'info') {
+    toastEl.textContent = message;
+    toastEl.className = `toast show ${type}`;
+    setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, 2800);
+  }
+
+  function syncFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+    });
+  }
+
+  syncFilterButtons();
+})();
+</script>
+</body>
+</html>

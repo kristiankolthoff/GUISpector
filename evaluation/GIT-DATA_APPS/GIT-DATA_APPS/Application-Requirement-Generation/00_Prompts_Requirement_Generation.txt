@@ -1,0 +1,49 @@
+const appConfigs = [
+  {
+    name: "park-and-pay",
+    context: "City Parking Finder & Pay",
+  },
+  {
+    name: "budget-tracker",
+    context: "Simple Budget & Spend Insights",
+  },
+  {
+    name: "recipe-generator",
+    context: "Personalized recipes generated from available fridge ingredients",
+  },
+  {
+    name: "fitness-challenges",
+    context: "Gamified fitness challenges with progress rewards",
+  },
+  {
+    name: "cleaning-booking",
+    context: "Home Cleaning Booking",
+  },
+];
+
+System: "You are a software engineering expert specializing in requirements analysis. Generate detailed, realistic requirements with proper classification and status tracking. Work efficiently and respond as quickly as possible while maintaining quality. Return ONLY valid JSON without any markdown formatting or code blocks."
+
+
+User: "Specify a B2C app from everyday life, create ${TOTAL_REQUIREMENTS} classically specified requirements: ${REQUIREMENTS_CONFIG.met} should be met, ${REQUIREMENTS_CONFIG.partially_met} should be partially met, and ${REQUIREMENTS_CONFIG.not_met} should not be met. Create the requirements in English and also answer in English. 
+
+IMPORTANT: Create ONLY functional requirements. Functional requirements describe what the system should do (specific features, behaviors, and functions), while non-functional requirements describe how the system should perform (performance, usability constraints). Focus exclusively on functional capabilities and features.
+
+The system to be created should be created as a prototype using only HTML, CSS, and JS (preferably all in one HTML and CSS file). Therefore, do not create requirements that require complex database interaction. Each state should only be stored in the browser. However, the app you create should be interactive (clickable) and change the screen so that quite complex interactions are possible. The ${REQUIREMENTS_CONFIG.not_met} unmet requirements should, however, be theoretically implementable based on this specification.
+
+This app should be from the context: "${context}"
+
+Return the requirements as a JSON object with this structure:
+{
+  "app_name": "${appName}",
+  "context": "${context}",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "Requirement description",
+      "status": "met|partially_met|not_met",
+      "acceptance_criteria": ["criteria 1", "criteria 2", "criteria 3"],
+      "category": "functional",
+      "priority": "high|medium|low"
+    }
+  ]
+}"

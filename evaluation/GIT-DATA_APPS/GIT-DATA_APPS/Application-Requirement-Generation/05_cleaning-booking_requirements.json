@@ -1,0 +1,366 @@
+{
+  "app_name": "Home Cleaning Booking",
+  "context": "Home Cleaning Booking",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "The app shall present a landing view summarizing cleaning services with a primary 'Book Now' action leading into the booking flow.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Landing view displays hero section summarizing core cleaning offerings on load.",
+        "'Book Now' primary button is visible without scrolling on standard viewport.",
+        "Selecting 'Book Now' transitions the user to the booking wizard Step 1 without page reload."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-002",
+      "description": "The app shall allow customers to choose a cleaning service category from interactive cards.",
+      "status": "met",
+      "acceptance_criteria": [
+        "At least three service categories are displayed as selectable cards.",
+        "Selecting a card visually highlights the chosen category.",
+        "The chosen category is retained when navigating to subsequent booking steps."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-003",
+      "description": "The app shall let customers choose optional service add-ons via toggles.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Add-on options are shown with descriptive labels and price impacts.",
+        "Toggling an add-on updates the selection state immediately.",
+        "Selected add-ons persist through to the booking summary."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-004",
+      "description": "The app shall present a step indicator showing progress through the booking wizard.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Step indicator displays all booking steps by name.",
+        "Current step is visually distinguished from upcoming steps.",
+        "Completed steps are indicated as finished once the user advances."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-005",
+      "description": "The app shall allow customers to choose preferred cleaning duration.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Duration options are presented as selectable inputs.",
+        "Only one duration can be active at a time.",
+        "Selected duration is reflected in real-time price estimate."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-006",
+      "description": "The app shall provide a date and time slot picker for scheduling the cleaning appointment.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Customers can select a calendar date from an interactive widget.",
+        "Available time slots for the selected date are displayed without reloading.",
+        "Chosen date and time slot are summarized before confirmation."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-007",
+      "description": "The app shall collect customer contact information before booking submission.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Form includes required fields for full name, email, and phone number.",
+        "Attempting to proceed without required fields triggers inline validation.",
+        "Valid entries populate the booking summary's contact section."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-008",
+      "description": "The app shall capture service address and entry instructions.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Customers can enter street address, unit details, and zip code.",
+        "Optional text area allows additional instructions for cleaners.",
+        "Address information is displayed in the confirmation summary."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-009",
+      "description": "The app shall generate a dynamic pricing estimate based on the booking selections.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Price summary updates instantly when service type changes.",
+        "Add-on selections modify the price estimate accordingly.",
+        "Final estimate is shown on the review screen prior to confirmation."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-010",
+      "description": "The app shall present a booking review screen summarizing all selections before confirmation.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Review screen lists service category, duration, date/time, add-ons, and price.",
+        "Contact and address details are displayed for verification.",
+        "'Confirm Booking' action is available only from the review screen."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-011",
+      "description": "The app shall generate a confirmation view with a unique booking reference after submission.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Upon confirmation, a unique alphanumeric reference is displayed.",
+        "Confirmation view reiterates key booking details.",
+        "Users can navigate from confirmation to 'My Bookings' view."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-012",
+      "description": "The app shall store confirmed bookings in client-side session for later viewing within the prototype.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Each confirmed booking is appended to the 'My Bookings' list immediately.",
+        "Switching between app sections retains the stored bookings.",
+        "Booking entries include reference, service type, date/time, and status."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-013",
+      "description": "The app shall allow customers to cancel a booking from the 'My Bookings' list while keeping history.",
+      "status": "met",
+      "acceptance_criteria": [
+        "'Cancel' action is available for pending bookings.",
+        "Cancelling updates the booking status to 'Cancelled' without deleting the entry.",
+        "Cancelled bookings are visually styled differently from active bookings."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-014",
+      "description": "The app shall allow users to mark a completed booking as done.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Each booking entry includes a 'Complete' action.",
+        "Activating 'Complete' changes booking status to 'Completed' in the list.",
+        "Completed bookings remain visible but are visually distinguished."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-015",
+      "description": "The app shall allow users to duplicate an existing booking into a new draft.",
+      "status": "met",
+      "acceptance_criteria": [
+        "'Duplicate' action is available per booking entry.",
+        "Selecting duplicate opens the booking wizard prefilled with original selections.",
+        "New confirmation assigns a fresh booking reference even when duplicated."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-016",
+      "description": "The app shall support filtering bookings by status (Pending, Completed, Cancelled).",
+      "status": "met",
+      "acceptance_criteria": [
+        "Status filter control lists Pending, Completed, Cancelled, and All options.",
+        "Selecting a status filters the displayed bookings accordingly.",
+        "Resetting to 'All' shows the full booking list again."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-017",
+      "description": "The app shall provide an expandable booking detail view for each entry.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Each booking card includes a 'View Details' trigger.",
+        "Trigger opens an overlay or expanded section showing full booking information.",
+        "Closing the details view returns to the list without losing context."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-018",
+      "description": "The app shall include a contact form for service inquiries accessible from navigation.",
+      "status": "met",
+      "acceptance_criteria": [
+        "Contact form collects name, email, subject, and message.",
+        "Submitting the contact form displays success feedback within the interface.",
+        "Form is accessible from main navigation without leaving the page."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-019",
+      "description": "The app shall allow users to edit any aspect of an existing booking before its scheduled date.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "'Edit' action opens the booking wizard with original data prefilled.",
+        "Users can modify service category, add-ons, duration, date, time, and contact info.",
+        "Saving edits updates the booking summary while retaining the same reference ID."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-020",
+      "description": "The app shall enable users to manage multiple saved service addresses for quick selection.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Users can add more than one address to a saved list.",
+        "Saved addresses persist within the session and appear as selectable options during booking.",
+        "Users can delete or rename saved addresses from the profile panel."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-021",
+      "description": "The app shall provide a drag-and-drop interface to reschedule bookings on a calendar view.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "'My Bookings' includes a calendar grid displaying each booking as a draggable item.",
+        "Dragging a booking to a new slot updates its date/time instantly.",
+        "System confirms the new schedule while maintaining other booking details."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-022",
+      "description": "The app shall support applying multiple promo codes per booking with cumulative discounts.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Booking form allows entry of more than one promo code.",
+        "Each valid code updates the price summary with individual discount lines.",
+        "Users can remove applied codes individually before confirmation."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-023",
+      "description": "The app shall display a status timeline for each booking covering Requested, Confirmed, En Route, In Progress, and Completed stages.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Booking details view includes a timeline with at least five stages.",
+        "Current stage is highlighted based on booking status data.",
+        "Timeline updates automatically when the booking status changes."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-024",
+      "description": "The app shall provide sharing options to send booking confirmations via email and messaging apps.",
+      "status": "partially_met",
+      "acceptance_criteria": [
+        "Confirmation view includes dedicated share controls for email and messaging.",
+        "Selecting email opens a pre-populated mail template with booking details.",
+        "Selecting messaging copies a summarized booking link to clipboard and indicates success."
+      ],
+      "category": "functional",
+      "priority": "low"
+    },
+    {
+      "id": "REQ-025",
+      "description": "The app shall allow customers to assign a preferred cleaner profile to their booking.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "'Select Cleaner' step lists available cleaners with profiles.",
+        "User can choose a preferred cleaner before confirmation.",
+        "Selected cleaner is stored with the booking and shown in the summary."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-026",
+      "description": "The app shall present real-time cleaner location tracking on the booking confirmation page.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Confirmation page includes a live map component.",
+        "Map shows the cleaner's current location updating at least every 30 seconds.",
+        "Location updates stop when the booking is marked completed."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-027",
+      "description": "The app shall support scheduling recurring bookings in a single flow.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Booking wizard includes recurrence frequency options such as weekly or bi-weekly.",
+        "Users can set start date and number of occurrences.",
+        "Summary lists all future occurrences with dates and times."
+      ],
+      "category": "functional",
+      "priority": "high"
+    },
+    {
+      "id": "REQ-028",
+      "description": "The app shall let users export a booking to their personal calendar via downloadable ICS file.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Confirmation view offers an 'Export to Calendar' action.",
+        "Action generates an ICS file containing booking details.",
+        "Downloaded ICS file contains correct date, time, and address."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-029",
+      "description": "The app shall capture a digital signature from the cleaner or customer upon completion.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Completion workflow includes a signature canvas input.",
+        "Captured signature image is attached to the booking record.",
+        "Signature is viewable from the booking details panel."
+      ],
+      "category": "functional",
+      "priority": "medium"
+    },
+    {
+      "id": "REQ-030",
+      "description": "The app shall support full localization with a language toggle for English and Spanish interfaces.",
+      "status": "not_met",
+      "acceptance_criteria": [
+        "Global language toggle is accessible from the header.",
+        "Switching language updates all visible text content without reloading the page.",
+        "User's language preference persists for the session."
+      ],
+      "category": "functional",
+      "priority": "low"
+    }
+  ]
+}
