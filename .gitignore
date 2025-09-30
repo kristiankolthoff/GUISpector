@@ -9,4 +9,3 @@ webapp/requirements.txt
 gui_spector/resources/datasets/
 gui_spector/resources/examples/
 gui_spector/resources/runs/
-/webapp/media/
